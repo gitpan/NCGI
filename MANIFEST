@@ -1,0 +1,21 @@
+Changes
+debian/changelog
+debian/compat
+debian/control
+debian/copyright
+debian/postinst
+debian/rules
+inc/Module/Install.pm
+inc/Module/Install/Base.pm
+inc/Module/Install/Makefile.pm
+inc/Module/Install/MakeMaker.pm
+inc/Module/Install/Metadata.pm
+lib/NCGI.pm
+lib/NCGI/Cookie.pm
+lib/NCGI/Header.pm
+lib/NCGI/Query.pm
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+META.yml			Module meta-data (added by MakeMaker)
+README

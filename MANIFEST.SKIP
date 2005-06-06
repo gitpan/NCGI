@@ -1,0 +1,6 @@
+_darcs
+build-stamp
+debian/files
+debian/libncgi-perl
+install-stamp
+.*\.swp

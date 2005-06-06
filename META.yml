@@ -1,0 +1,14 @@
+name: NCGI
+module_name: NCGI
+version: 0.01
+abstract: A New CGI Module
+author: Mark Lawrence <nomad@null.net>
+license: unknown
+distribution_type: module
+requires:
+  Class::Singleton: 0
+  XML::API: 0.05
+no_index:
+  directory:
+    - inc
+generated_by: Module::Install version 0.34
