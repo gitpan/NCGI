@@ -8,6 +8,9 @@ Standards-Version: 3.6.1
 
 Package: libncgi-perl
 Architecture: all
-Depends: ${perl:Depends}, ${misc:Depends}, libxml-api-perl, libclass-singleton-perl
-Description:  A New CGI Module
- .
+Depends: ${perl:Depends}, ${misc:Depends}, libxml-api-perl, libtime-hires-perl
+Description:  A New CGI Module for Perl
+  NCGI is a collection of Perl modules that assist authors in writing
+  Common Gateway Interface (CGI) scripts. It is kind of like the standard
+  'CGI' module but much lighter in code and features, has a different
+  inteface and produces better output.

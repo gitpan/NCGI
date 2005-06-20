@@ -1,4 +1,30 @@
 Changelog for NCGI
 
+Mon Jun 20 11:37:50 CEST 2005  Mark Lawrence <nomad@null.net>
+  * debian/changelog: updated Description field
+
+Mon Jun 20 11:33:51 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Documented dependency on Time::HiRes
+
+Mon Jun 20 11:23:21 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Added Log::Delta
+
+Mon Jun 20 10:57:29 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Removed send() (must now use $cgi->respond)
+
+Mon Jun 20 10:41:14 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Refactored most things to use NCGI::Singleton
+  * Upped version to 0.02
+  * General implementation cleanup, API starting to finalise.
+
+Mon Jun 20 10:37:59 CEST 2005  Mark Lawrence <nomad@null.net>
+  * escape/unescape query keys and values in NCGI::Cookie
+
+Mon Jun 20 10:36:06 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Added NCGI::Singleton - Class::Singleton implementation for persistent Perl
+
+Mon Jun 20 10:35:20 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Added debug.pm from Infinity Interactive
+
 Mon Jun  6 17:07:01 CEST 2005  Mark Lawrence <nomad@null.net>
   * Initial Revision

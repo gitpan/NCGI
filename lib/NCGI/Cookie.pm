@@ -19,6 +19,7 @@ use overload '""' => \&_as_string, 'fallback' => 1;
 our $VERSION = '0.01';
 my $now = time;
 
+
 #
 # This routine takes (name,value,minutes_to_live,path,domain) as arguments
 # to set a cookie.
@@ -119,7 +120,18 @@ sub fetch {
     my $hashref = {};
     foreach my $sets (@pairs) {
         my ($key,$val) = split(/=/, $sets);
-        $hashref->{unescape($key)} = unescape($val);
+        if (exists($hashref->{unescape($key)})) {
+            if (ref($hashref->{unescape($key)}) eq 'ARRAY') {
+                push(@{$hashref->{unescape($key)}}, unescape($val));
+            }
+            else {
+                push(@{$hashref->{unescape($key)}},
+                       $hashref->{unescape($key)}, unescape($val));
+            }
+        }
+        else {
+            $hashref->{unescape($key)} = unescape($val);
+        }
     }
     return $hashref;
 }
@@ -155,18 +167,30 @@ __END__
 
 =head1 NAME
 
-NCGI::Cookie - HTTP GET/POST Cookie object for NCGI
+NCGI::Cookie - HTTP Cookie object for NCGI
 
 =head1 SYNOPSIS
 
   use NCGI::Cookie;
-  my $q = NCGI::Cookie->new();
 
-  if ($q->isquery) {
-    print "GET\n" if $q->isget();
-    print "POST\n" if $q->isget();
-    print "Your submit button is called: ",$q->query->{'submit'};
-  }
+  # subroutine for reading cookies from the query
+  my $hashref      = NCGI::Cookie::fetch();
+  my $cookie_value = $hashref->{cookie_name};
+
+  # object methods for creating cookies to send in the response
+  my ($name, $value, $min, $path, $domain) = ('c1','value',60,'/',undef);
+  my $c = NCGI::Cookie->new(
+    name    => $name,
+    value   => $value,
+    expires => $min,
+    path    => $path,
+    domain  => $domain,
+  );
+
+  # You can also do "print $c->_as_string;"
+  print $c;
+  # c1=value; expires=Tue 07-Jun-2005 12:02:01 GMT; path=/;
+
 
 =head1 DESCRIPTION
 
@@ -174,6 +198,9 @@ B<NCGI::Cookie> provides a simple HTTP Cookie object for use
 in the Rekudos framework. In most cases Rekudos Module authors will not
 need to use this module/object as NCGI::Main creates 
 $NCGI::Globals::header for that purpose.
+
+=head1 SUBROUTINES
+
 
 =head1 METHODS
 

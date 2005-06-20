@@ -12,14 +12,17 @@ package NCGI;
 use 5.006;
 use strict;
 use warnings;
-use base qw(NCGI::Query);
+use base 'NCGI::Query';
 use Carp;
-use XML::API;
+use Log::Delta;
+use NCGI::Query;
 use NCGI::Header;
-use rek::Log;
+use XML::API;
+use Data::Dumper;
+use debug;
 
-our $VERSION = '0.01';
-our $html;
+our $VERSION = '0.02';
+
 
 #
 # This only gets called from the first Class::Singleton::instance() call
@@ -29,33 +32,36 @@ sub _new_instance {
     my $class = ref($proto) || $proto;
 
     my %args = (
-        debug => 0,
+        on_warn => \&warn,
+        on_die  => \&die,
         @_,
     );
 
-    my $self = NCGI::Query->new(@_);
+    my $self = NCGI::Query->instance(%args);
+    bless($self, $class);
 
-    $self->{cgi_on_die}  = \&die;
-    $self->{cgi_on_warn} = \&warn;
-    $self->{cgi_debug}   = $args{debug};
+    #
+    # These two should usually never fail (or produce warnings) and
+    # we need them to be here before we reset __DIE__ and __WARN__
+    #
+    $self->{cgi_header}  = NCGI::Header->instance();
+    $self->{cgi_content} = XML::API->new(doctype => 'xhtml');
 
-    if (ref($self->{cgi_on_die}) eq 'CODE') {
-        $main::SIG{__DIE__} = $self->{cgi_on_die};
+    debug::log('Created XML::API Object') if(DEBUG);
+
+    $self->{old_warn} = $main::SIG{__WARN__};
+    if (ref($self->{on_warn}) eq 'CODE') {
+        $main::SIG{__WARN__} = $self->{on_warn};
+        debug::log('__WARN__ Handler installed') if(DEBUG);
     }
-    if (ref($self->{cgi_on_warn}) eq 'CODE') {
-        $main::SIG{__WARN__} = $self->{cgi_on_warn};
+
+    $self->{old_die}  = $main::SIG{__DIE__};
+    if (ref($self->{on_die}) eq 'CODE') {
+        $main::SIG{__DIE__} = $self->{on_die};
+        debug::log('__DIE__ Handler installed') if(DEBUG);
     }
 
-    $self->{cgi_header} = NCGI::Header->new();
-    $self->{cgi_html}   = XML::API->new(doctype => 'xhtml');
-    $self->{cgi_sent}   = 0;
-
-    $html = $self->{cgi_html};
-
-    if ($self->{debug}) {
-        $self->{'log'} = rek::Log->instance();
-        $self->{'log'}->l('NCGI Created');
-    }
+    my $html = $self->{cgi_content};
 
     $html->head_open();
     $html->_set_id('head');
@@ -64,8 +70,10 @@ sub _new_instance {
     $html->body_open();
     $html->_set_id('body');
 
-    $self->{cgi_header}->status('200 OK');
-    bless($self, $class);
+    $self->{cgi_sent} = 0;
+
+    debug::log('NCGI Object Initialised') if(DEBUG);
+
     return $self;
 }
 
@@ -74,39 +82,55 @@ sub header {
     return $self->{cgi_header};
 }
 
-
-sub html {
+sub content {
     my $self = shift;
-    $self->{cgi_html} = shift if(@_);
-    return $self->{cgi_html};
+    $self->{cgi_content} = shift if(@_);
+    return $self->{cgi_content};
 }
 
-sub send {
-    my $self = shift;
-    $self->respond(@_);
-}
 
 sub respond {
     my $self = shift;
+    my $html = $self->{cgi_content};
+
     if ($self->{cgi_sent}) {
         carp 'Attempt to respond() more than once';
         return;
     }
-    if ($self->{debug} == 2) {
-        $html->_goto('body');
-        $html->pre($self->{'log'}->as_string);
-    }
+
+    ### DEBUG ###
+    debug::log('Sending response to client at',(caller)[1,2]) if(DEBUG);
+    $html->_goto('body') if(DEBUG);
+    require Log::Delta   if(DEBUG);
+    $html->pre(Log::Delta->instance->as_string) if(DEBUG);
+    ### DEBUG ###
+
+    #
+    # From here on it doesn't make sense for us to handle
+    # warn and die
+    #
+    $main::SIG{__WARN__} = $self->{old_warn};
+    $main::SIG{__DIE__}  = $self->{old_die};
+
     $self->{cgi_header}->_print();
+#    print $html->_fast_string();
     $html->_print();
     $self->{cgi_sent} = 1;
+
 }
+
 
 #
 # A default handler in the event that 'warn' gets called
 #
 sub warn {
     my $self = __PACKAGE__->instance();
+    if ($self->{cgi_sent}) {
+        warn @_;
+        return;
+    }
 
+    my $html    = $self->{cgi_content};
     my $current = $html->_current();
     $html->_goto('body');
     $html->pre_open({style => 'color: #cc0000;'}, 'warning: ');
@@ -115,9 +139,7 @@ sub warn {
     foreach (@_) {
         (my $x = $_) =~ s/\n$//g;
         $html->_add($x);
-        if ($self->{debug}) {
-            $self->{'log'}->l('warn:', $x);
-        }
+        debug::log('warn:', $x) if(DEBUG);
     }
 
     $html->pre_close();
@@ -131,34 +153,37 @@ sub warn {
 # A default handler in the event that 'die' gets called
 #
 sub die {
+    my $self = __PACKAGE__->instance();
+    if ($self->{cgi_sent}) {
+        die @_;
+    }
+
+
     #
     # First of all check if this occured within an "eval" block and
     # don't actually die if that is the case
     #
     my $i = 1;
-    my @caller;
-    while (@caller = caller($i)) {
+    while (my @caller = caller($i)) {
         if ($caller[3] =~ /^\(?eval\)?$/) {
+            debug::log('die (eval):', @_) if(DEBUG);
             return;
         }
         $i++;
     }
-    my $self = __PACKAGE__->instance();
+
+    #
+    # respond() if the output has not already been sent
+    #
+
+    debug::log('die:', @_) if(DEBUG);
     if ($self->{cgi_sent}) {
         die "'die' was called after browser output sent, with: @_";
-        if ($self->{debug}) {
-            $self->{'log'}->l("'die' was called after browser output sent, with: @_");
-        }
     }
 
-    if ($self->{debug}) {
-        (my @tmp = @_) =~ s/\n//mg;
-        foreach (@_) {
-            (my $x = $_) =~ s/\n$//g;
-            $self->{'log'}->l('error:', $x);
-        }
-    }
     $self->{cgi_header}->status('500 Internal Server Error');
+
+    my $html = $self->{cgi_content};
     $html->_goto('body');
     $html->pre({style => 'color: #ff0000;'}, 'error: ', @_);
     $html->pre('500 Internal Server Error');
@@ -166,8 +191,9 @@ sub die {
     die @_;
 }
 
-1;
 
+
+1;
 __END__
 
 =head1 NAME
@@ -178,7 +204,7 @@ NCGI - A Common Gateway Interface (CGI) Class
 
   use NCGI;
   my $cgi  = NCGI->new();
-  my $html = $cgi->html;
+  my $html = $cgi->content;
 
   $html->_goto('head');
   $html->title('A Simple Example');

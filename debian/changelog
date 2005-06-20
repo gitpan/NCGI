@@ -1,3 +1,9 @@
+libncgi-perl (0.02-1) testing; urgency=low
+
+  * New Upstream
+
+ --  <nomad@null.net>  Mon,  6 Jun 2005 17:20:20 +0200
+
 libncgi-perl (0.01-1) unstable; urgency=low
 
   * Initial Release

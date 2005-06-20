@@ -3,7 +3,7 @@ use inc::Module::Install;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-my $version = '0.01';
+my $version = '0.02';
 my $name    = 'NCGI';
 my $fname   = "NCGI-$version";
 

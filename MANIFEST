@@ -14,6 +14,9 @@ lib/NCGI.pm
 lib/NCGI/Cookie.pm
 lib/NCGI/Header.pm
 lib/NCGI/Query.pm
+lib/NCGI/Singleton.pm
+lib/Log/Delta.pm
+lib/debug.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP

@@ -7,70 +7,79 @@ package NCGI::Header;
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # ----------------------------------------------------------------------
-# HTTP Header object for NCGI
+# HTTP Header Response object for NCGI
 # ----------------------------------------------------------------------
 use strict;
 use warnings;
-use NCGI::Cookie;
+use base 'NCGI::Singleton';
+use debug;
 
-sub new {
+our $AUTOLOAD;
+
+sub _new_instance {
     my $proto = shift;
     my $class = ref($proto) || $proto;
-    my $self  = {};
-    bless ($self, $class);
+    my $self  = {
+        headers      => {content_type => ['text/html']},
+        @_,
+    };
 
-    $self->content_type(shift || 'text/html');
+    debug::log('NCGI::Header Initialised') if(DEBUG);
+
+    bless ($self, $class);
     return $self;
 }
 
+
 sub location {
     my $self = shift;
-    if (@_) {
-        $self->{Location} = shift;
-        delete($self->{Status});
-    }
-    return $self->{location};
-
+    delete $self->{headers}->{status};
+    $self->{headers}->{location} = [shift];
 }
 
-sub status {
+sub _add_location {
+    warn 'You cannot _add to the Location header. Use location() instead';
+    return;
+}
+
+sub AUTOLOAD {
     my $self = shift;
-    if (@_) {
-        $self->{Status} = join(" ", @_);
-    }
-    return $self->{Status};
+    (my $str = $AUTOLOAD) =~ s/.*:://;
 
+    if ($str =~ /^_add_(.*)/) {
+        push(@{$self->{headers}->{lc($1)}}, @_);
+    }
+    else {
+        $self->{headers}->{lc($str)} = [@_];
+    }
+    return;
 }
 
-sub content_type {
-    my $self = shift;
-    if (@_) {
-        $self->{'Content-Type'} = shift;
-    }
-    return $self->{'Content-Type'};
-}
-
-sub _add_cookie {
-    my $self = shift;
-    my $cookie = NCGI::Cookie->new(@_);
-    if ($cookie) {
-        $self->{Cookie} = $cookie;
-    }
-}
 
 sub _as_string {
     my $self = shift;
-    my $output;
-    while (my ($field, $val) = each %{$self}) {
-        $output .= "$field: $val\n";
+    my @items;
+    while (my ($key, $val) = each %{$self->{headers}}) {
+        (my $header = $key) =~  s/(^\w)/uc($1)/e;
+        $header =~  s/_(\w)/'-' . uc($1)/e;
+        foreach (@{$val}) {
+            push(@items, "$header: $_");
+        }
     }
-    $output .= "\n";
-    return $output;
+    return join("\n", @items) . "\n\n";
 }
+
 
 sub _print {
     my $self = shift;
+    if ($self->{_is_sent}) {
+        warn 'Attempt to send headers more than once';
+        return;
+    }
     print $self->_as_string();
+    $self->{_is_sent} = 1;
+
+    debug::log('Sent HTTP Headers') if(DEBUG);
 }
 
 

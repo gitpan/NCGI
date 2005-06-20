@@ -2,8 +2,9 @@ NCGI
 ====
 
   NCGI is a collection of Perl modules that assist authors in writing
-  Common Gateway Interface (CGI) scripts. It is intended as the next
-  generation 'CGI' module.
+  Common Gateway Interface (CGI) scripts. It is kind of like the standard
+  'CGI' module but much lighter in code and features, has a different
+  inteface and produces better output.
 
 INSTALLATION
 
@@ -19,7 +20,7 @@ DEPENDENCIES
   This module requires these other modules and libraries:
 
     XML::API         (CPAN)
-    Class::Singleton (CPAN)
+    Time::HiRes      (CPAN)
 
 COPYRIGHT AND LICENCE
 

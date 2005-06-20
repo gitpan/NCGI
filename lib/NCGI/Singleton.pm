@@ -1,4 +1,4 @@
-package NCGI::Query;
+package NCGI::Singleton;
 # ----------------------------------------------------------------------
 # Copyright (C) 2005 Mark Lawrence <nomad@null.net>
 #
@@ -7,129 +7,35 @@ package NCGI::Query;
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # ----------------------------------------------------------------------
-# HTTP GET/POST Query object for NCGI
+# Singleton object for NCGI
 # ----------------------------------------------------------------------
 use strict;
 use warnings;
-use base 'NCGI::Singleton';
-use NCGI::Cookie;
-use CGI::Util qw(unescape);
 use debug;
 
 our $VERSION = '0.01';
 
-#
-# This only gets called from the first Class::Singleton::instance() call
-#
-sub _new_instance {
-    my $proto = shift;
-    my $class = ref($proto) || $proto;
-    my $self  = {
-        @_,
-    };
+sub instance {
+    my $class  = shift;
 
-    $self->{q_params} = {};
-    $self->{q_full}   = '';
-    $self->{q_type}   = 'NOQUERY';
+    # get a reference to the _instance variable in the $class package
+    no strict 'refs';
+    my $instance = \${ "$class\::_instance" };
+    return $$instance if ($ENV{"NCGI_SINGLETON_$class"});
 
+    debug::log("$class->_new_instance ",caller) if(DEBUG);
+    $$instance = $class->_new_instance(@_);
+    $ENV{"NCGI_SINGLETON_$class"} = join(' ', caller);
+    return $$instance;
+};
 
-    if ($ENV{CONTENT_LENGTH}) {
-        $self->{q_type}  = 'POST';
-        my $length = read(STDIN, $self->{q_full}, $ENV{CONTENT_LENGTH});
-        if (!defined($length) or $length != $ENV{CONTENT_LENGTH}) {
-            warn "Could not read from STDIN: $!";
-            return undef;
-        }
-    }
-    elsif ($ENV{QUERY_STRING}) {
-        $self->{q_type} = 'GET';
-        $self->{q_full} = $ENV{QUERY_STRING};
-    }
-    chomp($self->{q_full});
-
-    $self->{q_params} = {};
-    foreach (split(/[&;]/, $self->{q_full})) {
-        my ($key, $val) = split('=', $_, 2);
-        $self->{q_params}->{unescape($key)} = unescape($val);
-    }
-
-    $self->{q_cookies} = NCGI::Cookie::fetch();
-
-    debug::log('NCGI::Query Initialised with '. $self->{q_type}) if(DEBUG);
-
-    bless ($self, $class);
-    return $self;
-}
-
-sub isquery {
-    my $self = shift;
-    return ($self->{q_type} ne 'NOQUERY');
-}
-
-sub isget {
-    my $self = shift;
-    return ($self->{q_type} eq 'GET');
-}
-
-sub ispost {
-    my $self = shift;
-    return ($self->{q_type} eq 'POST');
-}
-
-sub param {
-    my $self = shift;
-    my $param = shift;
-    exists($self->{q_params}->{$param}) && return $self->{q_params}->{$param};
-    return undef;
-}
-
-sub params {
-    my $self = shift;
-    return $self->{q_params};
-}
-
-sub full_query {
-    my $self = shift;
-    return $self->{q_full};
-}
-
-sub cookie {
-    my $self = shift;
-    my $param = shift;
-    exists($self->{q_cookies}->{$param}) && return $self->{q_cookies}->{$param};
-    return undef;
-}
-
-sub cookies {
-    my $self = shift;
-    return $self->{q_cookies};
-}
-
-sub dump_params {
-    my $self = shift;
-    my $str = '';
-    while (my ($key, $val) = each %{$self->{q_params}}) {
-        $val = '******' if ($key =~ /pass/);
-        $str .= "$key = $val\n";
-    }
-    return $str;
-}
-
-sub dump_cookies {
-    my $self = shift;
-    my $str;
-    while (my ($key, $val) = each %{$self->{q_cookies}}) {
-        $str .= "$key = $val\n";
-    }
-    return $str;
-}
 
 1;
 __END__
 
 =head1 NAME
 
-NCGI::Query - HTTP GET/POST Query object for NCGI
+NCGI::Singleton - Singleton object for NCGI
 
 =head1 SYNOPSIS
 
