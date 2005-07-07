@@ -19,6 +19,37 @@ use overload '""' => \&_as_string, 'fallback' => 1;
 our $VERSION = '0.01';
 my $now = time;
 
+# ----------------------------------------------------------------------
+# Class Functions
+# ----------------------------------------------------------------------
+
+#
+# Return a HASHREF of Cookies recieved
+#
+sub fetch {
+    my @pairs = split(/\;\s*/, $ENV{HTTP_COOKIE} ? $ENV{HTTP_COOKIE} : '');
+    my $hashref = {};
+    foreach my $sets (@pairs) {
+        my ($key,$val) = split(/=/, $sets);
+        if (exists($hashref->{unescape($key)})) {
+            if (ref($hashref->{unescape($key)}) eq 'ARRAY') {
+                push(@{$hashref->{unescape($key)}}, unescape($val));
+            }
+            else {
+                push(@{$hashref->{unescape($key)}},
+                       $hashref->{unescape($key)}, unescape($val));
+            }
+        }
+        else {
+            $hashref->{unescape($key)} = unescape($val);
+        }
+    }
+    return $hashref;
+}
+
+# ----------------------------------------------------------------------
+# Object Methods
+# ----------------------------------------------------------------------
 
 #
 # This routine takes (name,value,minutes_to_live,path,domain) as arguments
@@ -97,12 +128,10 @@ sub _as_string {
 }
 
 
-#
-# Class FUNCTIONs
-#
+# ----------------------------------------------------------------------
+# Private/Utility function.
+# ----------------------------------------------------------------------
 
-#
-# Utility function.
 #
 # '=' and ';' are not valid in the name or data components of cookies
 #
@@ -110,30 +139,6 @@ sub cookie_scrub {
   my $str = shift;
   $str =~ s/(\;|\=)//g;
   return $str;
-}
-
-#
-# Return a HASHREF of Cookies recieved
-#
-sub fetch {
-    my @pairs = split(/\;\s*/, $ENV{HTTP_COOKIE} ? $ENV{HTTP_COOKIE} : '');
-    my $hashref = {};
-    foreach my $sets (@pairs) {
-        my ($key,$val) = split(/=/, $sets);
-        if (exists($hashref->{unescape($key)})) {
-            if (ref($hashref->{unescape($key)}) eq 'ARRAY') {
-                push(@{$hashref->{unescape($key)}}, unescape($val));
-            }
-            else {
-                push(@{$hashref->{unescape($key)}},
-                       $hashref->{unescape($key)}, unescape($val));
-            }
-        }
-        else {
-            $hashref->{unescape($key)} = unescape($val);
-        }
-    }
-    return $hashref;
 }
 
 
@@ -187,57 +192,58 @@ NCGI::Cookie - HTTP Cookie object for NCGI
     domain  => $domain,
   );
 
-  # You can also do "print $c->_as_string;"
-  print $c;
-  # c1=value; expires=Tue 07-Jun-2005 12:02:01 GMT; path=/;
+  # You can also "print $c->_as_string;"
+  print $c; # c1=value; expires=Tue 07-Jun-2005 12:02:01 GMT; path=/;
 
 
 =head1 DESCRIPTION
 
-B<NCGI::Cookie> provides a simple HTTP Cookie object for use
-in the Rekudos framework. In most cases Rekudos Module authors will not
-need to use this module/object as NCGI::Main creates 
-$NCGI::Globals::header for that purpose.
+B<NCGI::Cookie> provides a simple HTTP Cookie object for Cookie creation,
+and a fetch subroutine to retrieve cookies sent by a browser.
 
 =head1 SUBROUTINES
 
+=head2 fetch
+
+Returns a HASH reference containing all Cookies sent by the browser.
 
 =head1 METHODS
 
-=head2 new( ), new($content_type)
+=head2 new( ... )
 
-Create a new NCGI::Cookie object, optionally specifying a content type.
+Create a new NCGI::Cookie object with parameters 'name', 'value',
+'expires', 'path' and 'domain'. Only 'name' and 'value' are really
+necessary as expires will automatically be filled in otherwise.
 
-=head2 $header->status($status)
+=head2 name
 
-Set or get the string representing the status of the HTTP response. There
-is no validity checking when setting so you should read the
-HTTP specification for valid strings (eg '200 OK'). This has no default.
+Set or Get the name of the cookie
 
-=head2 $header->content_type($type)
+=head2 value
 
-Set or get the string representing the Content-Type of the HTTP response.
-There is no validity checking when setting so you should read the
-HTTP/MIME specifications for valid strings. The default is 'text/html'.
+Set or Get the value of the cookie. Will be scrubbed for illegal characters.
 
-=head2 $header->location($location)
+=head2 expires
 
-Set or get the string representing the Location of a HTTP redirection.
-There is no validity checking when setting so you should read the
-HTTP specification for valid strings. This has no default.
+Set or Get the expiration value of the cookie in minutes
 
-=head2 $header->_as_string( )
+=head2 path
 
-Returns a string representation of the HTTP Cookie.
+Set or Get the path of the cookie
 
-=head2 $header->_print( )
+=head2 domain
 
-Print the HTTP header to STDOUT. Exactly the same as
-'print $header->_as_string;'.
+Set or Get the domain of the cookie
+
+=head2 _as_string
+
+Returns the string representation of the cookie. The "" operator is
+overloaded so if you just 'print $cookie' you should also get the string
+representation.
 
 =head1 SEE ALSO
 
-L<NCGI>
+L<NCGI::Query>
 
 =head1 AUTHOR
 

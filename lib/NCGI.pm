@@ -7,26 +7,24 @@ package NCGI;
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # ----------------------------------------------------------------------
-# NCGI - A New CGI
+# NCGI - A New CGI Module
 # ----------------------------------------------------------------------
 use 5.006;
 use strict;
 use warnings;
 use base 'NCGI::Query';
 use Carp;
-use Log::Delta;
-use NCGI::Query;
 use NCGI::Header;
 use XML::API;
-use Data::Dumper;
 use debug;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
-#
-# This only gets called from the first Class::Singleton::instance() call
-#
+# ----------------------------------------------------------------------
+# This method is not even private - it is only called by NCGI::Query
+# which is derived from NCGI::Singleton
+# ----------------------------------------------------------------------
 sub _new_instance {
     my $proto = shift;
     my $class = ref($proto) || $proto;
@@ -77,11 +75,23 @@ sub _new_instance {
     return $self;
 }
 
+# ----------------------------------------------------------------------
+# Public methods
+# ----------------------------------------------------------------------
+
+
+#
+# A shortcut for NCGI::Header->instance
+#
 sub header {
     my $self = shift;
     return $self->{cgi_header};
 }
 
+
+#
+# A getter/setter for the content of this response
+#
 sub content {
     my $self = shift;
     $self->{cgi_content} = shift if(@_);
@@ -89,6 +99,9 @@ sub content {
 }
 
 
+#
+# Send the header and content to the client
+#
 sub respond {
     my $self = shift;
     my $html = $self->{cgi_content};
@@ -113,15 +126,13 @@ sub respond {
     $main::SIG{__DIE__}  = $self->{old_die};
 
     $self->{cgi_header}->_print();
-#    print $html->_fast_string();
     $html->_print();
     $self->{cgi_sent} = 1;
-
 }
 
 
 #
-# A default handler in the event that 'warn' gets called
+# A handler to override 'warn' calls
 #
 sub warn {
     my $self = __PACKAGE__->instance();
@@ -150,7 +161,7 @@ sub warn {
 
 
 #
-# A default handler in the event that 'die' gets called
+# A handler to override 'die' signals
 #
 sub die {
     my $self = __PACKAGE__->instance();
@@ -203,7 +214,7 @@ NCGI - A Common Gateway Interface (CGI) Class
 =head1 SYNOPSIS
 
   use NCGI;
-  my $cgi  = NCGI->new();
+  my $cgi  = NCGI->instance();
   my $html = $cgi->content;
 
   $html->_goto('head');
@@ -220,17 +231,8 @@ NCGI - A Common Gateway Interface (CGI) Class
   $html->form_close();
   $html->hr();
 
-  my $query = $cgi->query;
-  if ($query->{submit}) {
-    $html->p('I think your name is ', $query->{name});
-  }
-
-
-  if (param()) {
-    print "Your name is",em(param('name')),p,
-    "The keywords are: ",em(join(", ",param('words'))),p,
-    "Your favorite color is ",em(param('color')),
-    hr;
+  if ($cgi->params{submit}) {
+    $html->p('I think your name is ', $cgi->params{name});
   }
 
   $cgi->respond();
@@ -241,10 +243,10 @@ B<NCGI> has the same basic function as the well known L<CGI> module.
 It is an aide for authors writing CGI scripts. The advantages over CGI
 are
 
- * Smaller and simpler Codebase: 300 lines vs 7000 lines
- * Modular/maintainable Codebase: separate Header, XHTML, Query Classes
- * Better output: Based on XML::API for consistent XHTML
- * Better debugging: in-built logging with timing functions
+ * Smaller Codebase
+ * Modular Codebase: separate Header, XHTML, Query Classes
+ * XML::API based for better output
+ * Easy debugging features built-in
  * Different API
 
 The disadvantages over CGI are
@@ -253,36 +255,48 @@ The disadvantages over CGI are
  * Less features
  * Probably not as portable
 
-See http://rekudos.net/parselog/ to see it in action.
-
 =head1 METHODS
 
-=head2 new(%hash)
+As B<NCGI> derives from L<NCGI::Query> please see the L<NCGI::Query>
+documentation for base methods.
 
-Create a "Log::Parse" object. The %hash looks approximately like this:
+=head2 instance( ... )
 
-   my %args  = (
-        file        => '',
-        filetype    => '',
-        handlers    => '',
-        libdir      => '',
-        step        => '',
-        rrdrra      => '',
-        apache_domain => '',
-        debug       => 0,
-        @_
-    );
+NCGI is a Singleton class. See L<Class::Singleton> on CPAN for details on
+what this means. The B<instance> function returns a reference to the singleton,
+creating it if necessary and accepting the following parameters:
 
-but will vary depending on the type of handlers.
+=head3 on_warn
 
-=head2 parse()
+By default the Perl 'warn' function is overridden to include the warnings
+in the html response. If you want to turn this off you should set on_warn
+to 'undef'.
 
-Parses a logfile and creates RRDs according to the configuration given
-for the new() method.
+=head3 on_die
+
+By default the Perl 'die' function is overridden to include the die
+arguments in the html response. If you want to turn this off you should
+set on_die to 'undef'.
+
+=head2 header()
+
+Returns the NCGI::Header object for this response
+
+=head2 content()
+
+Get/Set the content for the response to the user agent. This must be
+an object that supplies at a mimimum a B<_print> method. By default
+this is an L<XML::API> object with 'head' and 'body' elements already
+created.
+
+=head2 respond()
+
+Sends the header and the content back to the user agent. Will complain
+if called more than once.
 
 =head1 SEE ALSO
 
-L<NCGI::Header>, L<NCGI::Query>, L<XML::API>
+L<NCGI::Singleton>, L<NCGI::Header>, L<NCGI::Query>, L<XML::API>, L<debug>
 
 =head1 AUTHOR
 

@@ -1,5 +1,34 @@
 Changelog for NCGI
 
+Thu Jul  7 12:54:30 CEST 2005  Mark Lawrence <nomad@null.net>
+  tagged 0.03
+
+Thu Jul  7 12:54:07 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Added basic test
+
+Thu Jul  7 12:25:33 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Moved NCGI::Cookie::fetch around
+
+Thu Jul  7 12:21:35 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Documented all NCGI* Classes
+
+Wed Jul  6 19:20:58 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Removed Time::HiRes dependency
+
+Wed Jul  6 13:38:54 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Added dependency on 'debug' module from CPAN (removed local version)
+
+Wed Jul  6 13:23:11 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Removed Log::Delta (now in separate package)
+
+Mon Jun 20 11:59:27 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Upped VERSION to 0.03
+  * Removed Class::Singleton dependency
+  * Added Time::HiRes dependency
+
+Mon Jun 20 11:56:54 CEST 2005  Mark Lawrence <nomad@null.net>
+  tagged 0.02
+
 Mon Jun 20 11:37:50 CEST 2005  Mark Lawrence <nomad@null.net>
   * debian/changelog: updated Description field
 

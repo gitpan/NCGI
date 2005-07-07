@@ -20,7 +20,12 @@ DEPENDENCIES
   This module requires these other modules and libraries:
 
     XML::API         (CPAN)
-    Time::HiRes      (CPAN)
+    debug            (CPAN)
+
+  If you want to actually do any debugging with NCGI then you also need
+  the following module:
+
+    Log::Delta       (CPAN)
 
 COPYRIGHT AND LICENCE
 

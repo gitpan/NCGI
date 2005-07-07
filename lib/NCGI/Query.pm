@@ -18,6 +18,10 @@ use debug;
 
 our $VERSION = '0.01';
 
+# ----------------------------------------------------------------------
+# Inherited methods
+# ----------------------------------------------------------------------
+
 #
 # This only gets called from the first Class::Singleton::instance() call
 #
@@ -61,21 +65,37 @@ sub _new_instance {
     return $self;
 }
 
+# ----------------------------------------------------------------------
+# Public methods
+# ----------------------------------------------------------------------
+
+#
+# Boolean to check if a GET or POST query was made
+#
 sub isquery {
     my $self = shift;
     return ($self->{q_type} ne 'NOQUERY');
 }
 
+#
+# Boolean to check if a GET query was made
+#
 sub isget {
     my $self = shift;
     return ($self->{q_type} eq 'GET');
 }
 
+#
+# Boolean to check if a POST query was made
+#
 sub ispost {
     my $self = shift;
     return ($self->{q_type} eq 'POST');
 }
 
+#
+# Return the value of a query parameter
+#
 sub param {
     my $self = shift;
     my $param = shift;
@@ -83,16 +103,25 @@ sub param {
     return undef;
 }
 
+#
+# Return HASHREF of all query items
+#
 sub params {
     my $self = shift;
     return $self->{q_params};
 }
 
+#
+# Return the string that makes up the query
+#
 sub full_query {
     my $self = shift;
     return $self->{q_full};
 }
 
+#
+# Return the value of a cookie sent
+#
 sub cookie {
     my $self = shift;
     my $param = shift;
@@ -100,11 +129,17 @@ sub cookie {
     return undef;
 }
 
+#
+# Return HASHREF of all cookies
+#
 sub cookies {
     my $self = shift;
     return $self->{q_cookies};
 }
 
+#
+# Return a string of all query parameters in the form 'key = value'
+#
 sub dump_params {
     my $self = shift;
     my $str = '';
@@ -115,6 +150,9 @@ sub dump_params {
     return $str;
 }
 
+#
+# Return a string of all cookies in the form 'name = value'
+#
 sub dump_cookies {
     my $self = shift;
     my $str;
@@ -134,57 +172,76 @@ NCGI::Query - HTTP GET/POST Query object for NCGI
 =head1 SYNOPSIS
 
   use NCGI::Query;
-  my $q = NCGI::Query->new();
+  my $q = NCGI::Query->instance();
 
+  print "Content-Type: text/plain\n\n";
   if ($q->isquery) {
     print "GET\n" if $q->isget();
     print "POST\n" if $q->isget();
-    print "Your submit button is called: ",$q->query->{'submit'};
+    print "Your submit button is called: ", $q->param('submit');
+    print "Your submitted name as: ", $q->params->{'name'};
+  }
+  else {
+    print "No query\n";
   }
 
 =head1 DESCRIPTION
 
-B<NCGI::Query> provides a simple HTTP Query object for use
-in the Rekudos framework. In most cases Rekudos Module authors will not
-need to use this module/object as NCGI::Main creates 
-$NCGI::Globals::header for that purpose.
+B<NCGI::Query> provides an interface to GET and POST queries sent by
+user agents. L<NCGI> derives directly from this class so all methods below
+are also available there.
 
 =head1 METHODS
 
-=head2 new( ), new($content_type)
+=head2 instance()
 
-Create a new NCGI::Query object, optionally specifying a content type.
+NCGI::Query is a Singleton class. See Class::Singleton on CPAN for details
+on what this means. The B<instance> function returns a reference to the
+singleton creating it if necessary.
 
-=head2 $header->status($status)
+=head2 isquery()
 
-Set or get the string representing the status of the HTTP response. There
-is no validity checking when setting so you should read the
-HTTP specification for valid strings (eg '200 OK'). This has no default.
+Boolean indicating whether a GET or POST query was received.
 
-=head2 $header->content_type($type)
+=head2 isget()
 
-Set or get the string representing the Content-Type of the HTTP response.
-There is no validity checking when setting so you should read the
-HTTP/MIME specifications for valid strings. The default is 'text/html'.
+Boolean indicating whether a GET query was received.
 
-=head2 $header->location($location)
+=head2 ispost()
 
-Set or get the string representing the Location of a HTTP redirection.
-There is no validity checking when setting so you should read the
-HTTP specification for valid strings. This has no default.
+Boolean indicating whether a POST query was received.
 
-=head2 $header->_as_string( )
+=head2 param()
 
-Returns a string representation of the HTTP Query.
+Takes a single argument (the key) and returns the query value.
 
-=head2 $header->_print( )
+=head2 params()
 
-Print the HTTP header to STDOUT. Exactly the same as
-'print $header->_as_string;'.
+Returns a reference to a HASH containing all query items.
+
+=head2 full_query()
+
+Returns the raw query string
+
+=head2 cookie()
+
+Takes a single argument (the cookie) and returns the cookie value.
+
+=head2 cookies()
+
+Returns a reference to a HASH containing all cookies
+
+=head2 dump_params()
+
+Returns a string representation of all query items and their values.
+
+=head2 dump_cookies()
+
+Returns a string representation of all cookies and their values.
 
 =head1 SEE ALSO
 
-L<NCGI>
+L<NCGI::Singleton>, L<NCGI::Cookie>, L<NCGI>
 
 =head1 AUTHOR
 

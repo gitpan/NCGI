@@ -93,58 +93,69 @@ NCGI::Header - HTTP Header object for NCGI
 =head1 SYNOPSIS
 
   use NCGI::Header;
-  $header = NCGI::Header->new();
+  my $header = NCGI::Header->instance();
+
   $header->content_type('text/plain');
   $header->status('200 OK');
-  print $header->_as_string();
-  # or
+  $header->test_header('tested');
+  $header->_add_multi('1');
+  $header->_add_multi('2');
   $header->_print();
+
+  print "The header sent was:\n\n",$header->_as_string();
+
+  # The header sent was:
+  #
+  # Content-Type: text/plain
+  # Status: 200 OK
+  # Multi: 1
+  # Multi: 2
+  # Test-Header: tested
 
 =head1 DESCRIPTION
 
-B<NCGI::Header> provides a simple HTTP Header object for use
-in the Rekudos framework. In most cases Rekudos Module authors will not
-need to use this module/object as NCGI::Main creates 
-$NCGI::Globals::header for that purpose.
+B<NCGI::Header> provides a simple HTTP Header object for responding
+to CGI requests. It is a singleton object (see L<Class::Singleton> on
+CPAN for a description of what this means).
 
 =head1 METHODS
 
-=head2 new( ), new($content_type)
+=head2 instance()
 
-Create a new NCGI::Header object, optionally specifying a content type.
+Returns a reference to the NCGI::Header object, creating it if necessary.
+The newly created object has a single header 'Content-Type' set to
+'text/html'.
 
-=head2 $header->status($status)
+=head2 header_type()
 
-Set or get the string representing the status of the HTTP response. There
-is no validity checking when setting so you should read the
-HTTP specification for valid strings (eg '200 OK'). This has no default.
+Create/Set the header 'Header-Type'. Notice that underlines are converted
+to dashes and that the first character of words are uppercased. This
+is an AUTOLOAD function meaning you can create whatever headers you like.
+If there were previously multiple 'Header-Type' headers then they are
+all replaced by the value of this call.
 
-=head2 $header->content_type($type)
+There is no validity checking when setting so you should read the HTTP/MIME
+specifications for valid strings.
 
-Set or get the string representing the Content-Type of the HTTP response.
-There is no validity checking when setting so you should read the
-HTTP/MIME specifications for valid strings. The default is 'text/html'.
+=head2 _add_header_type()
 
-=head2 $header->location($location)
+Add a header 'Header-Type'. This can be called multiple times and multiple
+headers will be sent.  Notice the automatic formatting as is done
+for header_type.
 
-Set or get the string representing the Location of a HTTP redirection.
-There is no validity checking when setting so you should read the
-HTTP specification for valid strings. This has no default.
-
-=head2 $header->_as_string( )
+=head2 _as_string()
 
 Returns a string representation of the HTTP Header.
 
-=head2 $header->_print( )
+=head2 _print()
 
 Print the HTTP header to STDOUT. Exactly the same as
-'print $header->_as_string;'.
+'print $header->_as_string;' except that B<_print> will warn if it is called
+more than once.
 
 =head1 SEE ALSO
 
-L<NCGI>
-
-This module was written for the Rekudos framework http://rekudos.net/.
+L<NCGI::Singleton>
 
 =head1 AUTHOR
 

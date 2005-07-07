@@ -15,10 +15,9 @@ lib/NCGI/Cookie.pm
 lib/NCGI/Header.pm
 lib/NCGI/Query.pm
 lib/NCGI/Singleton.pm
-lib/Log/Delta.pm
-lib/debug.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
 README
+t/NCGI.t

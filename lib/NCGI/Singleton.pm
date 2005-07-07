@@ -35,62 +35,33 @@ __END__
 
 =head1 NAME
 
-NCGI::Singleton - Singleton object for NCGI
+NCGI::Singleton - Singleton object for persistent CGI environments
 
 =head1 SYNOPSIS
 
-  use NCGI::Query;
-  my $q = NCGI::Query->new();
+  # In your package
+  package MyPackage;
+  use base 'NCGI::Singleton';
 
-  if ($q->isquery) {
-    print "GET\n" if $q->isget();
-    print "POST\n" if $q->isget();
-    print "Your submit button is called: ",$q->query->{'submit'};
-  }
+  # In scripts, other modules, wherever
+  use MyPackage;
+  my $obj = MyPackage->instance();
 
 =head1 DESCRIPTION
 
-B<NCGI::Query> provides a simple HTTP Query object for use
-in the Rekudos framework. In most cases Rekudos Module authors will not
-need to use this module/object as NCGI::Main creates 
-$NCGI::Globals::header for that purpose.
+B<NCGI::Singleton> is an implementation of L<Class::Singleton> that works
+in persistent Perl environments such as mod_perl and SpeedyCGI. It
+is drop-in-replaceable with L<Class::Singleton> so nothing else is
+documented here.
 
-=head1 METHODS
-
-=head2 new( ), new($content_type)
-
-Create a new NCGI::Query object, optionally specifying a content type.
-
-=head2 $header->status($status)
-
-Set or get the string representing the status of the HTTP response. There
-is no validity checking when setting so you should read the
-HTTP specification for valid strings (eg '200 OK'). This has no default.
-
-=head2 $header->content_type($type)
-
-Set or get the string representing the Content-Type of the HTTP response.
-There is no validity checking when setting so you should read the
-HTTP/MIME specifications for valid strings. The default is 'text/html'.
-
-=head2 $header->location($location)
-
-Set or get the string representing the Location of a HTTP redirection.
-There is no validity checking when setting so you should read the
-HTTP specification for valid strings. This has no default.
-
-=head2 $header->_as_string( )
-
-Returns a string representation of the HTTP Query.
-
-=head2 $header->_print( )
-
-Print the HTTP header to STDOUT. Exactly the same as
-'print $header->_as_string;'.
+The reason L<Class::Singleton> doesn't work (as I would like it to)
+is because it relies on the existence of a global variable in a package.
+Since globals are not deleted for each request it is not easy to have
+singletons that only exist for the length of the request.
 
 =head1 SEE ALSO
 
-L<NCGI>
+L<Class::Singleton>
 
 =head1 AUTHOR
 
