@@ -18,7 +18,7 @@ use NCGI::Header;
 use XML::API;
 use debug;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 # ----------------------------------------------------------------------
@@ -61,11 +61,11 @@ sub _new_instance {
 
     my $html = $self->{cgi_content};
 
-    $html->head_open();
+    $html->head_open(undef);
     $html->_set_id('head');
     $html->head_close();
 
-    $html->body_open();
+    $html->body_open(undef);
     $html->_set_id('body');
 
     $self->{cgi_sent} = 0;
@@ -104,7 +104,6 @@ sub content {
 #
 sub respond {
     my $self = shift;
-    my $html = $self->{cgi_content};
 
     if ($self->{cgi_sent}) {
         carp 'Attempt to respond() more than once';
@@ -113,9 +112,9 @@ sub respond {
 
     ### DEBUG ###
     debug::log('Sending response to client at',(caller)[1,2]) if(DEBUG);
-    $html->_goto('body') if(DEBUG);
+    $self->{cgi_content}->_goto('body') if(DEBUG);
     require Log::Delta   if(DEBUG);
-    $html->pre(Log::Delta->instance->as_string) if(DEBUG);
+    $self->{cgi_content}->pre(Log::Delta->instance->as_string) if(DEBUG);
     ### DEBUG ###
 
     #
@@ -126,7 +125,7 @@ sub respond {
     $main::SIG{__DIE__}  = $self->{old_die};
 
     $self->{cgi_header}->_print();
-    $html->_print();
+    $self->{cgi_content}->_print();
     $self->{cgi_sent} = 1;
 }
 
@@ -227,33 +226,59 @@ NCGI - A Common Gateway Interface (CGI) Class
   $html->_add("What's your name? ");
   $html->input({type => 'text', name => 'name'});
   $html->input({type => 'submit', name => 'submit', value => 'Submit'});
-
   $html->form_close();
+
   $html->hr();
 
-  if ($cgi->params{submit}) {
-    $html->p('I think your name is ', $cgi->params{name});
+  if ($cgi->params->{submit}) {
+    $html->p('I think your name is ', $cgi->params->{name});
   }
 
   $cgi->respond();
 
 =head1 DESCRIPTION
 
-B<NCGI> has the same basic function as the well known L<CGI> module.
-It is an aide for authors writing CGI scripts. The advantages over CGI
-are
+B<NCGI> is an aide for authors writing CGI scripts. It has the same
+basic function as the well known L<CGI> module although with a
+completely different interface.
 
- * Smaller Codebase
- * Modular Codebase: separate Header, XHTML, Query Classes
- * XML::API based for better output
- * Easy debugging features built-in
- * Different API
+=head1 WHEN TO USE NCGI?
 
-The disadvantages over CGI are
+B<NCGI> does not make sense if you are already using and are 
+comfortable with the standard L<CGI> module. However if would
+like to easily produce standards-compliant XHTML using a proper
+object-oriented interface then this is the module for you.
 
- * Different API
- * Less features
- * Probably not as portable
+The advantages of NCGI are:
+
+* Has a true object oriented interface. The incoming query, the outgoing
+header and the outgoing content are all objects. The content object
+is modified via method calls mainting a true document object model.
+This give you the flexibility of creating content 'out of order'.
+Ie you can create a 'title' element inside the 'head' element and
+then add to the 'body' element, but go back later and add a 'link'
+to the 'head'.
+
+* Will always produce valid (and nicely indented) XML as long as you
+use the API.
+
+* Improved debugging - Warnings and 'die' statements are
+automatically added to the content object allieviating the head
+scratching that goes on when you receive an Internal Server Error. The
+content that you created up to this point is still displayed and
+the entire document is still conformant.
+
+* Is based on a Singleton class (see L<Class::Singleton> for a description)
+meaning that you can easily work with the same query/header/content
+objects from multiple modules without having to pass around strings.
+
+The disadvantages of NCGI are
+
+* Completely different API from CGI
+
+* Probably not as portable
+
+* Less features
 
 =head1 METHODS
 
@@ -284,8 +309,7 @@ Returns the NCGI::Header object for this response
 
 =head2 content()
 
-Get/Set the content for the response to the user agent. This must be
-an object that supplies at a mimimum a B<_print> method. By default
+Get/Set the content for the response to the user agent. By default
 this is an L<XML::API> object with 'head' and 'body' elements already
 created.
 
@@ -296,11 +320,15 @@ if called more than once.
 
 =head1 SEE ALSO
 
-L<NCGI::Singleton>, L<NCGI::Header>, L<NCGI::Query>, L<XML::API>, L<debug>
+L<CGI::Simple>, L<NCGI::Singleton>, L<NCGI::Header>, L<NCGI::Query>,
+L<XML::API>, L<debug>
 
 =head1 AUTHOR
 
 Mark Lawrence E<lt>nomad@null.netE<gt>
+
+Feel free to send me a mail telling me if you have used this module.
+Until now I'm the only known user...
 
 =head1 COPYRIGHT AND LICENSE
 

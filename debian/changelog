@@ -1,3 +1,27 @@
+libncgi-perl (0.04-2) testing; urgency=low
+
+  * New upstream.
+
+ --  <nomad@null.net>  Thu, 21 Jul 2005 11:23:29 +0200
+
+libncgi-perl (0.04.rc1-2) testing; urgency=low
+
+  * mismatch bugfix.
+
+ --  <nomad@null.net>  Wed, 20 Jul 2005 14:37:10 +0200
+
+libncgi-perl (0.04.rc2-1) testing; urgency=low
+
+  * New upstream 
+
+ --  <nomad@null.net>  Wed, 20 Jul 2005 12:23:31 +0200
+
+libncgi-perl (0.04-1) testing; urgency=low
+
+  * New Upstream
+
+ --  <nomad@null.net>  Thu,  7 Jul 2005 12:58:22 +0200
+
 libncgi-perl (0.03-1) testing; urgency=low
 
   * New Upstream

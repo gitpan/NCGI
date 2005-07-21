@@ -14,6 +14,7 @@ use warnings;
 use base 'NCGI::Singleton';
 use debug;
 
+our $VERSION = '0.01';
 our $AUTOLOAD;
 
 sub _new_instance {

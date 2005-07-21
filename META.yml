@@ -1,6 +1,6 @@
 name: NCGI
 module_name: NCGI
-version: 0.03
+version: 0.04
 abstract: A New CGI Module
 author: Mark Lawrence <nomad@null.net>
 license: unknown

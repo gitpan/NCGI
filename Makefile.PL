@@ -3,7 +3,7 @@ use inc::Module::Install;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-my $version = '0.03';
+my $version = '0.04';
 my $name    = 'NCGI';
 my $fname   = "NCGI-$version";
 
@@ -22,12 +22,16 @@ changes:
 
 deb: changes
 	(head -1 debian/changelog | grep $version) || exit 1
-	rm -f $fname.tar.gz
+	rm -f $fname.tar.gz *.deb *.changes
 	-chmod 755 debian/rules
 	\$(MAKE) dist
 	tar zxvf $fname.tar.gz
 	cd $fname && dpkg-buildpackage -b -rfakeroot -tc
 	rm -rf $fname
+
+deba:
+	sudo cp *.deb *.changes /var/lib/debarchiver/incoming
+	sudo debarchiver -so
 
 tgz:
 	rm -f $name.tgz

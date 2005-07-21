@@ -1,5 +1,14 @@
 Changelog for NCGI
 
+Thu Jul 21 11:39:45 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Debian depends: need version 0.05 of libxml-api-perl
+  * Created 'head' and body elements with at least 'undef'
+  * Documentation improvement: When to use NCGI? Advantages?
+  * Documentation: send me an email if you are using this module
+
+Thu Jul  7 12:59:00 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Version to 0.04
+
 Thu Jul  7 12:54:30 CEST 2005  Mark Lawrence <nomad@null.net>
   tagged 0.03
 
