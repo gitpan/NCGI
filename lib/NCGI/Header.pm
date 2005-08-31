@@ -14,14 +14,15 @@ use warnings;
 use base 'NCGI::Singleton';
 use debug;
 
-our $VERSION = '0.01';
+our $VERSION = $NCGI::Singleton::VERSION;
 our $AUTOLOAD;
 
 sub _new_instance {
     my $proto = shift;
     my $class = ref($proto) || $proto;
     my $self  = {
-        headers      => {content_type => ['text/html']},
+        headers => {content_type => ['application/xhtml+xml']},
+        headers => {content_type => ['text/html']},
         @_,
     };
 
@@ -46,6 +47,10 @@ sub _add_location {
 sub AUTOLOAD {
     my $self = shift;
     (my $str = $AUTOLOAD) =~ s/.*:://;
+
+    for (@_) {
+        warn "undefined value for header '$str'" if (!defined($_));
+    }
 
     if ($str =~ /^_add_(.*)/) {
         push(@{$self->{headers}->{lc($1)}}, @_);

@@ -1,5 +1,19 @@
 Changelog for NCGI
 
+Wed Aug 31 09:21:02 CEST 2005  Mark Lawrence <nomad@null.net>
+  tagged 0.05
+
+Tue Aug 30 17:56:31 CEST 2005  Mark Lawrence <nomad@null.net>
+  * debian: liblog-delta-perl dependency >= 0.03
+
+Tue Aug 30 17:50:41 CEST 2005  Mark Lawrence <nomad@null.net>
+  * Upped VERSION to 0.05
+  * Documentation updates.
+  * Added dependency on Log::Delta and removed dependency on debug.
+
+Mon Aug 22 11:49:48 CEST 2005  Mark Lawrence <nomad@null.net>
+  tagged 0.04
+
 Thu Jul 21 11:39:45 CEST 2005  Mark Lawrence <nomad@null.net>
   * Debian depends: need version 0.05 of libxml-api-perl
   * Created 'head' and body elements with at least 'undef'

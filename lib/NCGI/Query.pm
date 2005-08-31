@@ -16,7 +16,7 @@ use NCGI::Cookie;
 use CGI::Util qw(unescape);
 use debug;
 
-our $VERSION = '0.01';
+our $VERSION = $NCGI::Singleton::VERSION;
 
 # ----------------------------------------------------------------------
 # Inherited methods

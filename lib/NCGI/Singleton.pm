@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use debug;
 
-our $VERSION = '0.01';
+our $VERSION = '0.05';
 
 sub instance {
     my $class  = shift;

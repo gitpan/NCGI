@@ -18,7 +18,7 @@ use NCGI::Header;
 use XML::API;
 use debug;
 
-our $VERSION = '0.04';
+our $VERSION = $NCGI::Query::VERSION;
 
 
 # ----------------------------------------------------------------------
@@ -45,6 +45,17 @@ sub _new_instance {
     $self->{cgi_header}  = NCGI::Header->instance();
     $self->{cgi_content} = XML::API->new(doctype => 'xhtml');
 
+    my $html = $self->{cgi_content};
+    $html->_set_id('html');
+
+    $html->head_open(undef);
+    $html->_set_id('head');
+    $html->head_close();
+
+    $html->body_open(undef);
+    $html->_set_id('body');
+
+
     debug::log('Created XML::API Object') if(DEBUG);
 
     $self->{old_warn} = $main::SIG{__WARN__};
@@ -59,14 +70,6 @@ sub _new_instance {
         debug::log('__DIE__ Handler installed') if(DEBUG);
     }
 
-    my $html = $self->{cgi_content};
-
-    $html->head_open(undef);
-    $html->_set_id('head');
-    $html->head_close();
-
-    $html->body_open(undef);
-    $html->_set_id('body');
 
     $self->{cgi_sent} = 0;
 
@@ -125,7 +128,7 @@ sub respond {
     $main::SIG{__DIE__}  = $self->{old_die};
 
     $self->{cgi_header}->_print();
-    $self->{cgi_content}->_print();
+    print $self->{cgi_content};
     $self->{cgi_sent} = 1;
 }
 
@@ -143,7 +146,7 @@ sub warn {
     my $html    = $self->{cgi_content};
     my $current = $html->_current();
     $html->_goto('body');
-    $html->pre_open({style => 'color: #cc0000;'}, 'warning: ');
+    $html->pre_open(-style => 'color: #cc0000;', 'warning: ');
 
     (my @tmp = @_) =~ s/\n//mg;
     foreach (@_) {
@@ -163,12 +166,6 @@ sub warn {
 # A handler to override 'die' signals
 #
 sub die {
-    my $self = __PACKAGE__->instance();
-    if ($self->{cgi_sent}) {
-        die @_;
-    }
-
-
     #
     # First of all check if this occured within an "eval" block and
     # don't actually die if that is the case
@@ -185,18 +182,18 @@ sub die {
     #
     # respond() if the output has not already been sent
     #
-
     debug::log('die:', @_) if(DEBUG);
+    my $self = __PACKAGE__->instance();
     if ($self->{cgi_sent}) {
         die "'die' was called after browser output sent, with: @_";
     }
 
-    $self->{cgi_header}->status('500 Internal Server Error');
-
     my $html = $self->{cgi_content};
     $html->_goto('body');
-    $html->pre({style => 'color: #ff0000;'}, 'error: ', @_);
+    $html->pre(-style => 'color: #ff0000;', 'error: ', @_);
     $html->pre('500 Internal Server Error');
+
+    $self->{cgi_header}->status('500 Internal Server Error');
     $self->respond();
     die @_;
 }
@@ -220,12 +217,12 @@ NCGI - A Common Gateway Interface (CGI) Class
   $html->title('A Simple Example');
 
   $html->_goto('body');
-  $html->h1('Simple Form');
+  $html->h1('A Simple Form');
 
   $html->form_open();
   $html->_add("What's your name? ");
-  $html->input({type => 'text', name => 'name'});
-  $html->input({type => 'submit', name => 'submit', value => 'Submit'});
+  $html->input(-type => 'text', -name => 'name');
+  $html->input(-type => 'submit', -name => 'submit', -value => 'Submit');
   $html->form_close();
 
   $html->hr();
@@ -254,7 +251,7 @@ The advantages of NCGI are:
 * Has a true object oriented interface. The incoming query, the outgoing
 header and the outgoing content are all objects. The content object
 is modified via method calls mainting a true document object model.
-This give you the flexibility of creating content 'out of order'.
+This gives you the flexibility of creating content 'out of order'.
 Ie you can create a 'title' element inside the 'head' element and
 then add to the 'body' element, but go back later and add a 'link'
 to the 'head'.
@@ -270,7 +267,8 @@ the entire document is still conformant.
 
 * Is based on a Singleton class (see L<Class::Singleton> for a description)
 meaning that you can easily work with the same query/header/content
-objects from multiple modules without having to pass around strings.
+objects from multiple modules without having to pass around strings
+or manage global objects.
 
 The disadvantages of NCGI are
 

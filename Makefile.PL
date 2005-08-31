@@ -3,13 +3,14 @@ use inc::Module::Install;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-my $version = '0.04';
+my $version = '0.05';
 my $name    = 'NCGI';
 my $fname   = "NCGI-$version";
 
 my $prereqs = {
-    'XML::API'         => 0.05,
-    'debug'            => 0,
+    'XML::API'         => 0.07,
+#    'debug'            => 0,
+    'Log::Delta'       => 0.02, # temporary until debug gets properly indexed.
 };
 
 sub MY::postamble { "

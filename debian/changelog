@@ -1,3 +1,27 @@
+libncgi-perl (0.05-2) testing; urgency=low
+
+  * liblog-delta-perl dependency >= 0.03
+
+ --  <nomad@null.net>  Tue, 30 Aug 2005 17:56:56 +0200
+
+libncgi-perl (0.05-1) testing; urgency=low
+
+  * New Upstream.
+
+ --  <nomad@null.net>  Tue, 30 Aug 2005 17:36:33 +0200
+
+libncgi-perl (0.04-4) testing; urgency=low
+
+  * die/warn testing within ModPerl::Registry and FCGI environments
+
+ --  <nomad@null.net>  Thu, 25 Aug 2005 16:12:22 +0200
+
+libncgi-perl (0.04-3) testing; urgency=low
+
+  * new upstream
+
+ --  <nomad@null.net>  Mon, 22 Aug 2005 14:08:54 +0200
+
 libncgi-perl (0.04-2) testing; urgency=low
 
   * New upstream.
