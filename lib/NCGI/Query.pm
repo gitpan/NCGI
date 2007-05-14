@@ -1,30 +1,17 @@
 package NCGI::Query;
-# ----------------------------------------------------------------------
-# Copyright (C) 2005 Mark Lawrence <nomad@null.net>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# ----------------------------------------------------------------------
-# HTTP GET/POST Query object for NCGI
-# ----------------------------------------------------------------------
 use strict;
 use warnings;
 use base 'NCGI::Singleton';
+use Encode;
+use I18N::LangTags qw(implicate_supers);
+use I18N::LangTags::Detect;
 use NCGI::Cookie;
 use CGI::Util qw(unescape);
-use debug;
 
-our $VERSION = $NCGI::Singleton::VERSION;
 
-# ----------------------------------------------------------------------
-# Inherited methods
-# ----------------------------------------------------------------------
+our $VERSION = '0.06';
 
-#
-# This only gets called from the first Class::Singleton::instance() call
-#
+# Class::Singleton::instance() call
 sub _new_instance {
     my $proto = shift;
     my $class = ref($proto) || $proto;
@@ -54,12 +41,39 @@ sub _new_instance {
     $self->{q_params} = {};
     foreach (split(/[&;]/, $self->{q_full})) {
         my ($key, $val) = split('=', $_, 2);
-        $self->{q_params}->{unescape($key)} = unescape($val);
+        if (!eval { $key = Encode::decode_utf8(unescape($key));
+                    $val = Encode::decode_utf8(unescape($val));}) {
+            warn $@;
+        }
+        if (exists($self->{q_params}->{$key})) {
+            my $ref = ref($self->{q_params}->{$key});
+            if ($ref eq 'ARRAY') {
+                push(@{$self->{q_params}->{$key}}, $val)
+            }
+            else {
+                $self->{q_params}->{$key} = [$self->{q_params}->{$key}, $val],
+            }
+        }
+        else {
+            $self->{q_params}->{$key} = $val,
+        }
     }
 
     $self->{q_cookies} = NCGI::Cookie::fetch();
 
-    debug::log('NCGI::Query Initialised with '. $self->{q_type}) if(DEBUG);
+    my @langs = implicate_supers(I18N::LangTags::Detect::detect);
+    my @locales;
+    foreach my $lang (@langs) {
+#        if ((my $loc = $lang) =~ s/-(.*)/'_'.uc($1)/e) {
+        (my $loc = $lang) =~ s/-(.*)/'_'.uc($1)/e;
+            push(@locales, $loc);
+#        };
+    }
+
+    $self->{q_langs}   = \@langs;
+    $self->{q_locales} = \@locales;
+
+    warn "debug: NCGI::Query $ENV{REQUEST_METHOD} (". join(',',@langs).')' if($main::DEBUG);
 
     bless ($self, $class);
     return $self;
@@ -99,8 +113,12 @@ sub ispost {
 sub param {
     my $self = shift;
     my $param = shift;
-    exists($self->{q_params}->{$param}) && return $self->{q_params}->{$param};
-    return undef;
+    return unless exists($self->{q_params}->{$param});
+    my $val = $self->{q_params}->{$param};
+    wantarray && (ref($val) eq 'ARRAY') && return @{$val};
+    (ref($val) eq 'ARRAY') && return $val->[0];
+    wantarray && return ($val);
+    return $val;
 }
 
 #
@@ -138,6 +156,23 @@ sub cookies {
 }
 
 #
+# Return list of requested languages
+#
+sub languages {
+    my $self = shift;
+    return @{$self->{q_langs}} if (wantarray);
+    return $self->{q_langs};
+}
+
+#
+# Return list of requested locales
+#
+sub locales {
+    my $self = shift;
+    return @{$self->{q_locales}};
+}
+
+#
 # Return a string of all query parameters in the form 'key = value'
 #
 sub dump_params {
@@ -162,12 +197,14 @@ sub dump_cookies {
     return $str;
 }
 
+
 1;
+
 __END__
 
 =head1 NAME
 
-NCGI::Query - HTTP GET/POST Query object for NCGI
+NCGI::Query - HTTP GET/POST Query/Request object for NCGI
 
 =head1 SYNOPSIS
 
@@ -188,16 +225,14 @@ NCGI::Query - HTTP GET/POST Query object for NCGI
 =head1 DESCRIPTION
 
 B<NCGI::Query> provides an interface to GET and POST queries sent by
-user agents. L<NCGI> derives directly from this class so all methods below
-are also available there.
+user agents.
 
 =head1 METHODS
 
 =head2 instance()
 
-NCGI::Query is a Singleton class. See Class::Singleton on CPAN for details
-on what this means. The B<instance> function returns a reference to the
-singleton creating it if necessary.
+Return a reference to the current request. NCGI::Query is a Singleton
+class. See Class::Singleton on CPAN for details on what this means.
 
 =head2 isquery()
 
@@ -213,7 +248,9 @@ Boolean indicating whether a POST query was received.
 
 =head2 param()
 
-Takes a single argument (the key) and returns the query value.
+Takes a single argument (the key) and returns the query value. Will
+return a list if called in array context. Useful for multiple parameters
+of the same name (eg. html multi option lists).
 
 =head2 params()
 
@@ -230,6 +267,17 @@ Takes a single argument (the cookie) and returns the cookie value.
 =head2 cookies()
 
 Returns a reference to a HASH containing all cookies
+
+=head2 languages()
+
+Returns an ordered list of preferred languages for this request. Basically
+a shortcut to I18N::LangTags::implicate_supers(I18N::LangTags::Detect::detect);
+
+=head2 locales()
+
+Returns an ordered list of preferred languages for this request, formatted
+for use by POSIX::setlocale. Browsers seem to give 'en-us' and the locale
+system has definitions called 'en_US'...
 
 =head2 dump_params()
 
@@ -249,7 +297,7 @@ Mark Lawrence E<lt>nomad@null.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2005 Mark Lawrence E<lt>nomad@null.netE<gt>
+Copyright (C) 2005-2007 Mark Lawrence E<lt>nomad@null.netE<gt>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

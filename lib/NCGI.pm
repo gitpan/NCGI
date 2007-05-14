@@ -1,163 +1,143 @@
 package NCGI;
-# ----------------------------------------------------------------------
-# Copyright (C) 2005 Mark Lawrence <nomad@null.net>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# ----------------------------------------------------------------------
-# NCGI - A New CGI Module
-# ----------------------------------------------------------------------
 use 5.006;
 use strict;
 use warnings;
-use base 'NCGI::Query';
+use base 'NCGI::Singleton';
 use Carp;
-use NCGI::Header;
-use XML::API;
-use debug;
+use Time::HiRes qw(time);
+use NCGI::Query;
+use NCGI::Response;
 
-our $VERSION = $NCGI::Query::VERSION;
+our $VERSION = '0.06';
+our $on_warn = \&warn_handler;
+our $on_die  = \&die_handler;
 
 
-# ----------------------------------------------------------------------
-# This method is not even private - it is only called by NCGI::Query
-# which is derived from NCGI::Singleton
-# ----------------------------------------------------------------------
+# NCGI::Singleton instantiator
 sub _new_instance {
     my $proto = shift;
     my $class = ref($proto) || $proto;
 
-    my %args = (
-        on_warn => \&warn,
-        on_die  => \&die,
-        @_,
-    );
+    on_warn($on_warn);
+    on_die($on_die);
 
-    my $self = NCGI::Query->instance(%args);
+    my $self = {
+        ctime    => time,
+        response => NCGI::Response->new,
+        query    => NCGI::Query->instance,
+        sent     => 0,
+        warnings => [],
+        debugs   => [],
+    };
     bless($self, $class);
 
-    #
-    # These two should usually never fail (or produce warnings) and
-    # we need them to be here before we reset __DIE__ and __WARN__
-    #
-    $self->{cgi_header}  = NCGI::Header->instance();
-    $self->{cgi_content} = XML::API->new(doctype => 'xhtml');
-
-    my $html = $self->{cgi_content};
-    $html->_set_id('html');
-
-    $html->head_open(undef);
-    $html->_set_id('head');
-    $html->head_close();
-
-    $html->body_open(undef);
-    $html->_set_id('body');
-
-
-    debug::log('Created XML::API Object') if(DEBUG);
-
-    $self->{old_warn} = $main::SIG{__WARN__};
-    if (ref($self->{on_warn}) eq 'CODE') {
-        $main::SIG{__WARN__} = $self->{on_warn};
-        debug::log('__WARN__ Handler installed') if(DEBUG);
-    }
-
-    $self->{old_die}  = $main::SIG{__DIE__};
-    if (ref($self->{on_die}) eq 'CODE') {
-        $main::SIG{__DIE__} = $self->{on_die};
-        debug::log('__DIE__ Handler installed') if(DEBUG);
-    }
-
-
-    $self->{cgi_sent} = 0;
-
-    debug::log('NCGI Object Initialised') if(DEBUG);
-
+    warn 'debug: NCGI Initialised' if($main::DEBUG);
     return $self;
 }
 
-# ----------------------------------------------------------------------
-# Public methods
-# ----------------------------------------------------------------------
 
-
-#
-# A shortcut for NCGI::Header->instance
-#
-sub header {
-    my $self = shift;
-    return $self->{cgi_header};
+sub query {
+    return NCGI->instance->{query};
+}
+sub q {
+    return NCGI->instance->{query};
 }
 
 
-#
-# A getter/setter for the content of this response
-#
-sub content {
-    my $self = shift;
-    $self->{cgi_content} = shift if(@_);
-    return $self->{cgi_content};
+sub response {
+    NCGI->instance->{response};
+}
+sub r {
+    response;
 }
 
 
-#
-# Send the header and content to the client
-#
 sub respond {
-    my $self = shift;
+    my $self = NCGI->instance;
 
-    if ($self->{cgi_sent}) {
-        carp 'Attempt to respond() more than once';
+    if ($self->{sent}) {
+        croak 'Attempt to respond() more than once';
         return;
     }
 
-    ### DEBUG ###
-    debug::log('Sending response to client at',(caller)[1,2]) if(DEBUG);
-    $self->{cgi_content}->_goto('body') if(DEBUG);
-    require Log::Delta   if(DEBUG);
-    $self->{cgi_content}->pre(Log::Delta->instance->as_string) if(DEBUG);
-    ### DEBUG ###
+    $self->render_warnings();
+
+    my $res = sprintf('%.3f', time - $self->{ctime});
+    $self->{response}->content->_goto('html');
+    $self->{response}->content->_comment(
+        "NCGI v$NCGI::VERSION. Response Generated in $res seconds"
+    );
+
+
+    # Why the perl -CSD flag doesn't work I don't know...
+    binmode STDOUT, ":utf8"
+        if ($self->{response}->content->_encoding eq 'UTF-8');
+
+    print $self->{response}->as_string;
+    $self->{sent} = 1;
 
     #
     # From here on it doesn't make sense for us to handle
     # warn and die
     #
-    $main::SIG{__WARN__} = $self->{old_warn};
-    $main::SIG{__DIE__}  = $self->{old_die};
+    $main::SIG{__WARN__} = \&CORE::warn;
+    $main::SIG{__DIE__} = \&CORE::die;
+}
 
-    $self->{cgi_header}->_print();
-    print $self->{cgi_content};
-    $self->{cgi_sent} = 1;
+
+sub render_warnings {
+    my $self = shift;
+
+    if (! scalar @{$self->{warnings}}) {
+        return;
+    }
+
+    my $x = $self->{response}->content;
+
+    if (ref($x) and $x->isa('XML::API::XHTML')) {
+        $x->_goto('body');
+        $x->pre_open(-style => "text-align: left;");
+
+        my $prev = $self->{ctime};
+
+        foreach my $w (@{$self->{warnings}}) {
+            my $msg = $w->[1];
+            if ($msg =~ s/^debug:\s*//) {
+                $x->_add(sprintf("%.5f (+%.5f) ",
+                                $w->[0] - $self->{ctime},
+                                $w->[0] - $prev) . $msg);
+                $prev = $w->[0];
+            }
+            else {
+                # use raw because we are inside a <pre>
+                chomp($msg);
+                $x->_raw('<span style="color: #ff0000;">'.
+                         XML::API::_escapeXML($msg) ."</span>\n");
+            }
+        }
+    }
+    return;
 }
 
 
 #
-# A handler to override 'warn' calls
+# A handler to deal with 'warn' calls
 #
-sub warn {
+sub warn_handler {
     my $self = __PACKAGE__->instance();
-    if ($self->{cgi_sent}) {
-        warn @_;
+    my $val  = shift;
+    $val     = '*undef*' unless (defined($val));
+
+    if ($self->{sent}) {
+        warn $val;
         return;
     }
 
-    my $html    = $self->{cgi_content};
-    my $current = $html->_current();
-    $html->_goto('body');
-    $html->pre_open(-style => 'color: #cc0000;', 'warning: ');
+#    if (!defined($ENV{HTTP_HOST})) {
+#        warn $val;
+#    }
 
-    (my @tmp = @_) =~ s/\n//mg;
-    foreach (@_) {
-        (my $x = $_) =~ s/\n$//g;
-        $html->_add($x);
-        debug::log('warn:', $x) if(DEBUG);
-    }
-
-    $html->pre_close();
-    $html->_goto($current);
-
+    push(@{$self->{warnings}}, [time, $val]);
     return;
 }
 
@@ -165,7 +145,7 @@ sub warn {
 #
 # A handler to override 'die' signals
 #
-sub die {
+sub die_handler {
     #
     # First of all check if this occured within an "eval" block and
     # don't actually die if that is the case
@@ -173,7 +153,6 @@ sub die {
     my $i = 1;
     while (my @caller = caller($i)) {
         if ($caller[3] =~ /^\(?eval\)?$/) {
-            debug::log('die (eval):', @_) if(DEBUG);
             return;
         }
         $i++;
@@ -182,22 +161,44 @@ sub die {
     #
     # respond() if the output has not already been sent
     #
-    debug::log('die:', @_) if(DEBUG);
+    warn 'debug: die:'. join('',@_) if($main::DEBUG);
     my $self = __PACKAGE__->instance();
-    if ($self->{cgi_sent}) {
+    if ($self->{sent}) {
         die "'die' was called after browser output sent, with: @_";
     }
 
-    my $html = $self->{cgi_content};
-    $html->_goto('body');
-    $html->pre(-style => 'color: #ff0000;', 'error: ', @_);
-    $html->pre('500 Internal Server Error');
+    my $x = $self->{response}->content;
+    $x->_goto('body');
+    $x->pre(-style => 'color: #ff0000;', 'error: ', @_);
+    $x->pre('500 Internal Server Error');
 
-    $self->{cgi_header}->status('500 Internal Server Error');
+    $self->{response}->header->status('500 Internal Server Error');
     $self->respond();
     die @_;
 }
 
+
+#
+# In case the user wants to override what happens with warnings
+#
+sub on_warn {
+    my $sub = shift;
+    if (ref($sub) ne 'CODE') {
+        croak 'usage: on_warn(CODEREF)';
+    }
+    $main::SIG{__WARN__} = $sub;
+    $on_warn = $sub;
+}
+
+
+sub on_die {
+    my $sub = shift;
+    if (ref($sub) ne 'CODE') {
+        croak 'usage: on_die(CODEREF)';
+    }
+    $main::SIG{__DIE__} = $sub;
+    $on_die = $sub;
+}
 
 
 1;
@@ -210,28 +211,29 @@ NCGI - A Common Gateway Interface (CGI) Class
 =head1 SYNOPSIS
 
   use NCGI;
-  my $cgi  = NCGI->instance();
-  my $html = $cgi->content;
+  my $q = NCGI->query;
+  my $x = NCGI->response->xhtml;
 
-  $html->_goto('head');
-  $html->title('A Simple Example');
+  $x->_set_lang('en');
+  $x->_goto('head');
+  $x->title('A Simple Example');
 
-  $html->_goto('body');
-  $html->h1('A Simple Form');
+  $x->_goto('body');
+  $x->h1('A Simple Form');
 
-  $html->form_open();
-  $html->_add("What's your name? ");
-  $html->input(-type => 'text', -name => 'name');
-  $html->input(-type => 'submit', -name => 'submit', -value => 'Submit');
-  $html->form_close();
+  $x->form_open();
+  $x->_add("What's your name? ");
+  $x->input(-type => 'text', -name => 'name');
+  $x->input(-type => 'submit', -name => 'submit', -value => 'Submit');
+  $x->form_close();
 
-  $html->hr();
+  $x->hr();
 
-  if ($cgi->params->{submit}) {
-    $html->p('I think your name is ', $cgi->params->{name});
+  if ($q->param('submit')) {
+    $x->p('I think your name is ', $q->param('name'));
   }
 
-  $cgi->respond();
+  NCGI->respond;
 
 =head1 DESCRIPTION
 
@@ -244,7 +246,8 @@ completely different interface.
 B<NCGI> does not make sense if you are already using and are 
 comfortable with the standard L<CGI> module. However if would
 like to easily produce standards-compliant XHTML using a proper
-object-oriented interface then this is the module for you.
+object-oriented interface then this module might be interesting
+for you.
 
 The advantages of NCGI are:
 
@@ -280,46 +283,58 @@ The disadvantages of NCGI are
 
 =head1 METHODS
 
-As B<NCGI> derives from L<NCGI::Query> please see the L<NCGI::Query>
-documentation for base methods.
+NCGI is a Singleton class. See L<Class::Singleton> on CPAN if you are
+unfamiliar with Singltons. What this means is that you don't have to
+create an object before you use these methods, you can call them
+just like 'NCGI->query', and you can do this from any module and always
+get the same object back.
 
-=head2 instance( ... )
+=head2 query
 
-NCGI is a Singleton class. See L<Class::Singleton> on CPAN for details on
-what this means. The B<instance> function returns a reference to the singleton,
-creating it if necessary and accepting the following parameters:
+Returns the L<NCGI::Query> object representing the inbound request from
+the browser.
 
-=head3 on_warn
+=head2 q
 
-By default the Perl 'warn' function is overridden to include the warnings
-in the html response. If you want to turn this off you should set on_warn
-to 'undef'.
+A shortcut for query().
 
-=head3 on_die
+=head2 response
+
+Returns the L<NCGI::Response> object representing the reply. You can
+modify this object to generate output.
+
+=head2 r
+
+A shortcut for response().
+
+=head2 on_warn
+
+By default the Perl 'warn' function is overridden so that warnings
+are included xhtml response. If you want to turn this off you should
+set on_warn to '\&CORE::warn'.
+
+=head2 on_die
 
 By default the Perl 'die' function is overridden to include the die
 arguments in the html response. If you want to turn this off you should
-set on_die to 'undef'.
+set on_die to '\&CORE::die'.
 
-=head2 header()
-
-Returns the NCGI::Header object for this response
-
-=head2 content()
-
-Get/Set the content for the response to the user agent. By default
-this is an L<XML::API> object with 'head' and 'body' elements already
-created.
-
-=head2 respond()
+=head2 respond
 
 Sends the header and the content back to the user agent. Will complain
 if called more than once.
 
 =head1 SEE ALSO
 
-L<CGI::Simple>, L<NCGI::Singleton>, L<NCGI::Header>, L<NCGI::Query>,
-L<XML::API>, L<debug>
+L<CGI::Simple>, L<NCGI::Singleton>, L<NCGI::Response::Header>,
+L<NCGI::Query>, L<NCGI::Response>
+
+=head1 COMPATABILITY
+
+v0.05 to v0.06 was a major cleanup and a better separation of
+responsibility/function between the various modules. Some methods
+were removed from NCGI, some added to other modules. Since I don't
+know anyone actually using NCGI I'm willing to take the risk...
 
 =head1 AUTHOR
 
@@ -330,7 +345,7 @@ Until now I'm the only known user...
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2005 Mark Lawrence <nomad@null.net>
+Copyright (C) 2005-2007 Mark Lawrence <nomad@null.net>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

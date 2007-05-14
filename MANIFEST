@@ -5,15 +5,23 @@ debian/control
 debian/copyright
 debian/postinst
 debian/rules
-inc/Module/Install.pm
+example/ncgi.cgi
+inc/Module/Install/Can.pm
 inc/Module/Install/Base.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
+inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Makefile.pm
-inc/Module/Install/MakeMaker.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Include.pm
 inc/Module/Install/Metadata.pm
+inc/Module/Install.pm
+inc/Module/AutoInstall.pm
 lib/NCGI.pm
 lib/NCGI/Cookie.pm
-lib/NCGI/Header.pm
 lib/NCGI/Query.pm
+lib/NCGI/Response.pm
+lib/NCGI/Response/Header.pm
 lib/NCGI/Singleton.pm
 Makefile.PL
 MANIFEST
@@ -21,3 +29,5 @@ MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
 README
 t/NCGI.t
+t/pod.t
+t/pod-coverage.t

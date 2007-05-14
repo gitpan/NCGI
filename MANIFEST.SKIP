@@ -4,3 +4,4 @@ debian/files
 debian/libncgi-perl
 install-stamp
 .*\.swp
+.git

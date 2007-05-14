@@ -1,19 +1,7 @@
 package NCGI::Singleton;
-# ----------------------------------------------------------------------
-# Copyright (C) 2005 Mark Lawrence <nomad@null.net>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# ----------------------------------------------------------------------
-# Singleton object for NCGI
-# ----------------------------------------------------------------------
 use strict;
 use warnings;
-use debug;
-
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub instance {
     my $class  = shift;
@@ -23,7 +11,21 @@ sub instance {
     my $instance = \${ "$class\::_instance" };
     return $$instance if ($ENV{"NCGI_SINGLETON_$class"});
 
-    debug::log("$class->_new_instance ",caller) if(DEBUG);
+    my $tmp = $class->_new_instance(@_);
+    if (ref($tmp)) {
+        $$instance = $tmp;
+        $ENV{"NCGI_SINGLETON_$class"} = join(' ', caller);
+        return $$instance;
+    }
+}
+
+
+sub _reset_instance {
+    my $class  = shift;
+    # get a reference to the _instance variable in the $class package
+    no strict 'refs';
+    my $instance = \${ "$class\::_instance" };
+
     $$instance = $class->_new_instance(@_);
     $ENV{"NCGI_SINGLETON_$class"} = join(' ', caller);
     return $$instance;
@@ -57,7 +59,7 @@ documented here.
 The reason L<Class::Singleton> doesn't work (as I would like it to)
 is because it relies on the existence of a global variable in a package.
 Since globals are not deleted for each request it is not easy to have
-singletons that only exist for the length of the request.
+singletons that only exist for the length of a CGI request.
 
 =head1 SEE ALSO
 
@@ -69,7 +71,7 @@ Mark Lawrence E<lt>nomad@null.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2005 Mark Lawrence E<lt>nomad@null.netE<gt>
+Copyright (C) 2005-2007 Mark Lawrence E<lt>nomad@null.netE<gt>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

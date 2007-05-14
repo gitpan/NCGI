@@ -4,21 +4,19 @@ use strict;
 use warnings;
 use Test::More;
 
-BEGIN { plan tests => 7 };
+BEGIN { plan tests => 6 };
 
-use NCGI::Query;
-use NCGI::Header;
 use NCGI;
 ok(1); # all use statements worked
-my $header = NCGI::Header->instance;
+my $q = NCGI->query;
 ok(1);
-my $query = NCGI::Query->instance;
+my $response = NCGI->r;
 ok(1);
-my $cgi = NCGI->instance;
+my $header = $response->header;
 ok(1);
-my $content = $cgi->content;
+my $x = $response->xhtml;
 ok(1);
-$cgi->respond;
+NCGI->respond;
 ok(1);
-ok(! $cgi->respond);
+ok(! NCGI->respond);
 

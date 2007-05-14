@@ -1,32 +1,21 @@
-package NCGI::Header;
-# ----------------------------------------------------------------------
-# Copyright (C) 2005 Mark Lawrence <nomad@null.net>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# ----------------------------------------------------------------------
-# HTTP Header Response object for NCGI
-# ----------------------------------------------------------------------
+package NCGI::Response::Header;
 use strict;
 use warnings;
-use base 'NCGI::Singleton';
-use debug;
+use Carp;
 
-our $VERSION = $NCGI::Singleton::VERSION;
+our $VERSION = '0.06';
 our $AUTOLOAD;
 
-sub _new_instance {
+sub new {
     my $proto = shift;
     my $class = ref($proto) || $proto;
+
     my $self  = {
-        headers => {content_type => ['application/xhtml+xml']},
-        headers => {content_type => ['text/html']},
+        headers => {},
         @_,
     };
 
-    debug::log('NCGI::Header Initialised') if(DEBUG);
+    warn 'debug: NCGI::Response::Header Initialised ' if($main::DEBUG);
 
     bless ($self, $class);
     return $self;
@@ -40,20 +29,23 @@ sub location {
 }
 
 sub _add_location {
-    warn 'You cannot _add to the Location header. Use location() instead';
-    return;
+    croak 'You cannot _add to the Location header. Use location() instead';
 }
 
 sub AUTOLOAD {
     my $self = shift;
     (my $str = $AUTOLOAD) =~ s/.*:://;
 
+
     for (@_) {
-        warn "undefined value for header '$str'" if (!defined($_));
+        carp "undefined value for header '$str'" if (!defined($_));
     }
 
     if ($str =~ /^_add_(.*)/) {
         push(@{$self->{headers}->{lc($1)}}, @_);
+    }
+    elsif ($str !~ /[a-zA-Z]+[a-zA-Z-]+/) {
+        croak 'unknown function '.__PACKAGE__."::$str";
     }
     else {
         $self->{headers}->{lc($str)} = [@_];
@@ -76,16 +68,19 @@ sub _as_string {
 }
 
 
-sub _print {
+sub _send {
     my $self = shift;
-    if ($self->{_is_sent}) {
-        warn 'Attempt to send headers more than once';
-        return;
+    if ($self->{sent}) {
+        croak 'Cannot send headers more than once';
+    }
+    if (!exists($self->{headers}->{status})) {
+        $self->{headers}->{status}->[0] = '200 OK';
     }
     print $self->_as_string();
-    $self->{_is_sent} = 1;
+    $self->{sent} = 1;
 
-    debug::log('Sent HTTP Headers') if(DEBUG);
+    warn 'debug: Sent HTTP Headers: ' . $self->{headers}->{status}->[0]
+        if($main::DEBUG);
 }
 
 
@@ -94,12 +89,12 @@ __END__
 
 =head1 NAME
 
-NCGI::Header - HTTP Header object for NCGI
+NCGI::Response::Header - HTTP Header object for NCGI
 
 =head1 SYNOPSIS
 
-  use NCGI::Header;
-  my $header = NCGI::Header->instance();
+  use NCGI::Response::Header;
+  my $header = NCGI::Response::Header->instance();
 
   $header->content_type('text/plain');
   $header->status('200 OK');
@@ -120,19 +115,17 @@ NCGI::Header - HTTP Header object for NCGI
 
 =head1 DESCRIPTION
 
-B<NCGI::Header> provides a simple HTTP Header object for responding
+B<NCGI::Response::Header> provides a simple HTTP Header object for responding
 to CGI requests. It is a singleton object (see L<Class::Singleton> on
 CPAN for a description of what this means).
 
 =head1 METHODS
 
-=head2 instance()
+=head2 instance
 
-Returns a reference to the NCGI::Header object, creating it if necessary.
-The newly created object has a single header 'Content-Type' set to
-'text/html'.
+Returns a reference to the NCGI::Response::Header singleton.
 
-=head2 header_type()
+=head2 header_type
 
 Create/Set the header 'Header-Type'. Notice that underlines are converted
 to dashes and that the first character of words are uppercased. This
@@ -143,25 +136,25 @@ all replaced by the value of this call.
 There is no validity checking when setting so you should read the HTTP/MIME
 specifications for valid strings.
 
-=head2 _add_header_type()
+=head2 _add_header_type
 
 Add a header 'Header-Type'. This can be called multiple times and multiple
 headers will be sent.  Notice the automatic formatting as is done
 for header_type.
 
-=head2 _as_string()
+=head2 _as_string
 
 Returns a string representation of the HTTP Header.
 
-=head2 _print()
+=head2 _send
 
 Print the HTTP header to STDOUT. Exactly the same as
-'print $header->_as_string;' except that B<_print> will warn if it is called
-more than once.
+'print $header->_as_string;' except that B<_send> keeps track if it
+has already been called and will croak if called more than once.
 
 =head1 SEE ALSO
 
-L<NCGI::Singleton>
+L<NCGI::Singleton>, L<NCGI>
 
 =head1 AUTHOR
 
@@ -169,7 +162,7 @@ Mark Lawrence E<lt>nomad@null.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2005 Mark Lawrence E<lt>nomad@null.netE<gt>
+Copyright (C) 2005-2007 Mark Lawrence E<lt>nomad@null.netE<gt>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

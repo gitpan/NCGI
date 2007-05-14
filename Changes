@@ -1,82 +1,119 @@
-Changelog for NCGI
+Commit: aaffc8d116fca77bf9e4a22d7bdf88b986d8da2f 
+Author: Mark Lawrence <nomad@null.net> Sat, 12 May 2007 17:28:56 +0200 
 
-Wed Aug 31 09:21:02 CEST 2005  Mark Lawrence <nomad@null.net>
-  tagged 0.05
+    Fully converted Makefile.PL to use Module::Install
 
-Tue Aug 30 17:56:31 CEST 2005  Mark Lawrence <nomad@null.net>
-  * debian: liblog-delta-perl dependency >= 0.03
+Commit: f3bc3ecb664c3ba36e741508dc48987903f9f7b4 
+Author: tailor <nomad@null.net> Mon, 24 Apr 2006 10:08:21 +0000 
 
-Tue Aug 30 17:50:41 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Upped VERSION to 0.05
-  * Documentation updates.
-  * Added dependency on Log::Delta and removed dependency on debug.
+    [project @ Refactored out NCGI/Response.pm from NCGI.pm]
 
-Mon Aug 22 11:49:48 CEST 2005  Mark Lawrence <nomad@null.net>
-  tagged 0.04
+Commit: 46b8773bf215005ecd1c89ce32d6edf7fefb9016 
+Author: Mark Lawrence <nomad@null.net> Tue, 30 Aug 2005 15:56:31 +0000 
 
-Thu Jul 21 11:39:45 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Debian depends: need version 0.05 of libxml-api-perl
-  * Created 'head' and body elements with at least 'undef'
-  * Documentation improvement: When to use NCGI? Advantages?
-  * Documentation: send me an email if you are using this module
+    [project @ debian: liblog-delta-perl dependency >= 0.03]
 
-Thu Jul  7 12:59:00 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Version to 0.04
+Commit: 369824c547707c661ff2a6592ab2e141286c91a1 
+Author: Mark Lawrence <nomad@null.net> Tue, 30 Aug 2005 15:50:41 +0000 
 
-Thu Jul  7 12:54:30 CEST 2005  Mark Lawrence <nomad@null.net>
-  tagged 0.03
+    [project @ Upped VERSION to 0.05]
+    * Documentation updates.
+    * Added dependency on Log::Delta and removed dependency on debug.
 
-Thu Jul  7 12:54:07 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Added basic test
+Commit: 597449897d6061eb5d86f13fcbb880cfc051b2dd 
+Author: Mark Lawrence <nomad@null.net> Thu, 21 Jul 2005 09:39:45 +0000 
 
-Thu Jul  7 12:25:33 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Moved NCGI::Cookie::fetch around
+    [project @ Debian depends: need version 0.05 of libxml-api-perl]
+    * Created 'head' and body elements with at least 'undef'
+    * Documentation improvement: When to use NCGI? Advantages?
+    * Documentation: send me an email if you are using this module
 
-Thu Jul  7 12:21:35 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Documented all NCGI* Classes
+Commit: 8b123f0488af6f2c098fea7b32c28d2be307a002 
+Author: Mark Lawrence <nomad@null.net> Thu, 07 Jul 2005 10:59:00 +0000 
 
-Wed Jul  6 19:20:58 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Removed Time::HiRes dependency
+    [project @ Version to 0.04]
 
-Wed Jul  6 13:38:54 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Added dependency on 'debug' module from CPAN (removed local version)
+Commit: 0b1738eb2d7ed6e77f008d5a5b4b8234cf1b580f 
+Author: Mark Lawrence <nomad@null.net> Thu, 07 Jul 2005 10:54:07 +0000 
 
-Wed Jul  6 13:23:11 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Removed Log::Delta (now in separate package)
+    [project @ Added basic test]
 
-Mon Jun 20 11:59:27 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Upped VERSION to 0.03
-  * Removed Class::Singleton dependency
-  * Added Time::HiRes dependency
+Commit: 7397a962b01afd12b2fb37fe7ff1fbf1a76f87fc 
+Author: Mark Lawrence <nomad@null.net> Thu, 07 Jul 2005 10:25:33 +0000 
 
-Mon Jun 20 11:56:54 CEST 2005  Mark Lawrence <nomad@null.net>
-  tagged 0.02
+    [project @ Moved NCGI::Cookie::fetch around]
 
-Mon Jun 20 11:37:50 CEST 2005  Mark Lawrence <nomad@null.net>
-  * debian/changelog: updated Description field
+Commit: f976d8ab9df6358c234fffeed01071d85b8cb81f 
+Author: Mark Lawrence <nomad@null.net> Thu, 07 Jul 2005 10:21:35 +0000 
 
-Mon Jun 20 11:33:51 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Documented dependency on Time::HiRes
+    [project @ Documented all NCGI* Classes]
 
-Mon Jun 20 11:23:21 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Added Log::Delta
+Commit: b430494ba9fe80bdd05922af7ec0576c251e4de1 
+Author: Mark Lawrence <nomad@null.net> Wed, 06 Jul 2005 17:20:58 +0000 
 
-Mon Jun 20 10:57:29 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Removed send() (must now use $cgi->respond)
+    [project @ Removed Time::HiRes dependency]
 
-Mon Jun 20 10:41:14 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Refactored most things to use NCGI::Singleton
-  * Upped version to 0.02
-  * General implementation cleanup, API starting to finalise.
+Commit: 80f2c3ebf78a80c89c842f7c77a0bb0e1eb546a2 
+Author: Mark Lawrence <nomad@null.net> Wed, 06 Jul 2005 11:38:54 +0000 
 
-Mon Jun 20 10:37:59 CEST 2005  Mark Lawrence <nomad@null.net>
-  * escape/unescape query keys and values in NCGI::Cookie
+    [project @ Added dependency on 'debug' module from CPAN (removed local version)]
 
-Mon Jun 20 10:36:06 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Added NCGI::Singleton - Class::Singleton implementation for persistent Perl
+Commit: 73695ffb7bb26b6c1ea4fb43f0748e53ef139e93 
+Author: Mark Lawrence <nomad@null.net> Wed, 06 Jul 2005 11:23:11 +0000 
 
-Mon Jun 20 10:35:20 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Added debug.pm from Infinity Interactive
+    [project @ Removed Log::Delta (now in separate package)]
 
-Mon Jun  6 17:07:01 CEST 2005  Mark Lawrence <nomad@null.net>
-  * Initial Revision
+Commit: eb33433a9a05696b459d719ce14ce7dbd1fb35e0 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 09:59:27 +0000 
+
+    [project @ Upped VERSION to 0.03]
+    * Removed Class::Singleton dependency
+    * Added Time::HiRes dependency
+
+Commit: 4ecdee4e41aae65242c9b39a65f246df8fbd98dd 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 09:37:50 +0000 
+
+    [project @ debian/changelog: updated Description field]
+
+Commit: 6084e0ea479164ae4a8f041a580396dc64112213 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 09:33:51 +0000 
+
+    [project @ Documented dependency on Time::HiRes]
+
+Commit: 1c870cd3c4ebf6f30b9f3cf7db5807f9f611d4fe 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 09:23:21 +0000 
+
+    [project @ Added Log::Delta]
+
+Commit: e7bd91f40a196d1d5068d12a7108d9835ee500f2 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 08:57:29 +0000 
+
+    [project @ Removed send() (must now use $cgi->respond)]
+
+Commit: ddc855708b47c71be7ee3b80f9586a949497ae69 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 08:41:14 +0000 
+
+    [project @ Refactored most things to use NCGI::Singleton]
+    * Upped version to 0.02
+    * General implementation cleanup, API starting to finalise.
+
+Commit: 930af81e78bf4b945270fd6f972a75c102c0636e 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 08:37:59 +0000 
+
+    [project @ escape/unescape query keys and values in NCGI::Cookie]
+
+Commit: 23d1b0ccac49a79090f5ad02d4d9d2a142a56125 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 08:36:06 +0000 
+
+    [project @ Added NCGI::Singleton - Class::Singleton implementation for persistent Perl]
+
+Commit: c19f526508497db920a47f2a71ceadbcfbf80de5 
+Author: Mark Lawrence <nomad@null.net> Mon, 20 Jun 2005 08:35:20 +0000 
+
+    [project @ Added debug.pm from Infinity Interactive]
+
+Commit: 7d72d532f83fee40ba4dab01820896ddf12fe0c5 
+Author: Mark Lawrence <nomad@null.net> Mon, 06 Jun 2005 15:07:01 +0000 
+
+    [project @ Initial Revision]
+
