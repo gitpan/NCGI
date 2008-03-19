@@ -9,7 +9,7 @@ use NCGI::Cookie;
 use CGI::Util qw(unescape);
 
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 # Class::Singleton::instance() call
 sub _new_instance {
@@ -42,9 +42,10 @@ sub _new_instance {
     foreach (split(/[&;]/, $self->{q_full})) {
         my ($key, $val) = split('=', $_, 2);
         if (!eval { $key = Encode::decode_utf8(unescape($key));
-                    $val = Encode::decode_utf8(unescape($val));}) {
+                    $val = Encode::decode_utf8(unescape($val));1;}) {
             warn $@;
         }
+        $val =~ s/\r//g;
         if (exists($self->{q_params}->{$key})) {
             my $ref = ref($self->{q_params}->{$key});
             if ($ref eq 'ARRAY') {
@@ -72,8 +73,6 @@ sub _new_instance {
 
     $self->{q_langs}   = \@langs;
     $self->{q_locales} = \@locales;
-
-    warn "debug: NCGI::Query $ENV{REQUEST_METHOD} (". join(',',@langs).')' if($main::DEBUG);
 
     bless ($self, $class);
     return $self;

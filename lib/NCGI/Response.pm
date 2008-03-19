@@ -6,7 +6,7 @@ use Carp;
 use NCGI::Response::Header;
 use XML::API::XHTML;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub new {
     my $proto = shift;
@@ -17,7 +17,6 @@ sub new {
     };
 
     bless($self, $class);
-    warn 'debug: NCGI::Response Initialised' if($main::DEBUG);
     return $self;
 }
 
@@ -86,8 +85,12 @@ sub as_string {
     if ($x->_langs) {
         $self->{header}->content_language(join(',', $x->_langs));
     }
-    $self->{header}->content_type($x->_content_type .
-                                  '; charset='. $x->_encoding);
+
+    my $type = $x->_content_type;
+    if ($ENV{HTTP_ACCEPT} and $ENV{HTTP_ACCEPT} !~ m/application\/xhtml\+xml/) {
+        $type = 'text/html';
+    }
+    $self->{header}->content_type($type .  '; charset='. $x->_encoding);
 
     my $doc = $self->{content}->$action;
 

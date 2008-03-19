@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 our $AUTOLOAD;
 
 sub new {
@@ -14,8 +14,6 @@ sub new {
         headers => {},
         @_,
     };
-
-    warn 'debug: NCGI::Response::Header Initialised ' if($main::DEBUG);
 
     bless ($self, $class);
     return $self;
@@ -78,9 +76,6 @@ sub _send {
     }
     print $self->_as_string();
     $self->{sent} = 1;
-
-    warn 'debug: Sent HTTP Headers: ' . $self->{headers}->{status}->[0]
-        if($main::DEBUG);
 }
 
 
@@ -94,7 +89,7 @@ NCGI::Response::Header - HTTP Header object for NCGI
 =head1 SYNOPSIS
 
   use NCGI::Response::Header;
-  my $header = NCGI::Response::Header->instance();
+  my $header = NCGI::Response::Header->new();
 
   $header->content_type('text/plain');
   $header->status('200 OK');
@@ -116,14 +111,18 @@ NCGI::Response::Header - HTTP Header object for NCGI
 =head1 DESCRIPTION
 
 B<NCGI::Response::Header> provides a simple HTTP Header object for responding
-to CGI requests. It is a singleton object (see L<Class::Singleton> on
-CPAN for a description of what this means).
+to CGI requests.
 
 =head1 METHODS
 
-=head2 instance
+=head2 new
 
-Returns a reference to the NCGI::Response::Header singleton.
+Returns a new NCGI::Response::Header object.
+
+=head2 location
+
+Adds a 'Location:' header, making sure that there is no 'Status:' header
+as well.
 
 =head2 header_type
 
@@ -154,7 +153,7 @@ has already been called and will croak if called more than once.
 
 =head1 SEE ALSO
 
-L<NCGI::Singleton>, L<NCGI>
+L<NCGI>
 
 =head1 AUTHOR
 
@@ -162,7 +161,7 @@ Mark Lawrence E<lt>nomad@null.netE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2005-2007 Mark Lawrence E<lt>nomad@null.netE<gt>
+Copyright (C) 2005-2008 Mark Lawrence E<lt>nomad@null.netE<gt>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

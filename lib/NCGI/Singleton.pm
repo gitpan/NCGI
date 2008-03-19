@@ -1,7 +1,7 @@
 package NCGI::Singleton;
 use strict;
 use warnings;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub instance {
     my $class  = shift;
@@ -58,8 +58,14 @@ documented here.
 
 The reason L<Class::Singleton> doesn't work (as I would like it to)
 is because it relies on the existence of a global variable in a package.
-Since globals are not deleted for each request it is not easy to have
-singletons that only exist for the length of a CGI request.
+Since globals are not deleted for each CGI request it is not easy to
+have singletons that only exist for the length of a CGI request.
+
+=head1 METHODS
+
+=head2 instance
+
+Returns the singleton, creating it if it doesn't already exist.
 
 =head1 SEE ALSO
 

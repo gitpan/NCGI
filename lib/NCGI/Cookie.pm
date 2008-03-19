@@ -1,14 +1,4 @@
 package NCGI::Cookie;
-# ----------------------------------------------------------------------
-# Copyright (C) 2005 Mark Lawrence <nomad@null.net>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# ----------------------------------------------------------------------
-# HTTP Cookie object for NCGI
-# ----------------------------------------------------------------------
 use strict;
 use warnings;
 use Carp;
@@ -16,8 +6,7 @@ use Digest::MD5 qw(md5_hex);
 use CGI::Util qw(escape unescape);
 use overload '""' => \&_as_string, 'fallback' => 1;
 
-our $VERSION = '0.06';
-my $now = time;
+our $VERSION = '0.07';
 
 # ----------------------------------------------------------------------
 # Class Functions
@@ -68,9 +57,9 @@ sub new {
     };
     bless ($self, $class);
 
-    $self->{name}  = escape(cookie_scrub($self->{name}));
-    $self->{value} = $self->{value} ? escape(cookie_scrub($self->{value})) :
-                     md5_hex(md5_hex($now . {} . rand() . $$));
+    $self->{name}  = escape(_cookie_scrub($self->{name}));
+    $self->{value} = $self->{value} ? escape(_cookie_scrub($self->{value})) :
+                     md5_hex(md5_hex(time . {} . rand() . $$));
 
     $self->{expires} = 60 * $self->{expires};
     return $self;
@@ -78,13 +67,13 @@ sub new {
 
 sub name {
     my $self = shift;
-    $self->{name} = cookie_scrub(shift) if (@_);
+    $self->{name} = _cookie_scrub(shift) if (@_);
     return $self->{name};
 }
 
 sub value {
     my $self = shift;
-    $self->{value} = cookie_scrub(shift) if (@_);
+    $self->{value} = _cookie_scrub(shift) if (@_);
     return $self->{value};
 }
 
@@ -120,7 +109,7 @@ sub _as_string {
     my $self = shift;
 
     my $str = $self->{name} .'='. $self->{value}.';';
-    $str   .= ' expires=' . cookie_date($self->{expires}) . ';' 
+    $str   .= ' expires=' . _cookie_date($self->{expires}) . ';' 
                                                  if ($self->{expires});
     $str   .= ' path=' . $self->{path} .';'      if ($self->{path});
     $str   .= ' domain=' . $self->{domain} . ';' if ($self->{domain});
@@ -135,7 +124,7 @@ sub _as_string {
 #
 # '=' and ';' are not valid in the name or data components of cookies
 #
-sub cookie_scrub {
+sub _cookie_scrub {
   my $str = shift;
   $str =~ s/(\;|\=)//g;
   return $str;
@@ -147,14 +136,14 @@ sub cookie_scrub {
 # time to calculate the expiration string for the cookie. Cookie
 # time is ALWAYS GMT!
 #
-sub cookie_date() {
+sub _cookie_date() {
 
   my ($seconds) = @_;
 
   my %mn = ('Jan','01', 'Feb','02', 'Mar','03', 'Apr','04',
             'May','05', 'Jun','06', 'Jul','07', 'Aug','08',
             'Sep','09', 'Oct','10', 'Nov','11', 'Dec','12' );
-  my $sydate=gmtime($now + $seconds);
+  my $sydate=gmtime(time + $seconds);
   my ($day, $month, $num, $time, $year) = split(/\s+/,$sydate);
   my    $zl=length($num);
   if ($zl == 1) { 
@@ -234,6 +223,11 @@ Set or Get the path of the cookie
 =head2 domain
 
 Set or Get the domain of the cookie
+
+=head2 expire_cookie
+
+Sets the expiration date of the cookie to 24 hours ago, effectively
+removing it from the browser cache.
 
 =head2 _as_string
 

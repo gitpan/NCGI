@@ -8,9 +8,9 @@ use Time::HiRes qw(time);
 use NCGI::Query;
 use NCGI::Response;
 
-our $VERSION = '0.06';
-our $on_warn = \&warn_handler;
-our $on_die  = \&die_handler;
+our $VERSION = '0.07';
+our $on_warn = \&_warn_handler;
+our $on_die  = \&_die_handler;
 
 
 # NCGI::Singleton instantiator
@@ -18,8 +18,9 @@ sub _new_instance {
     my $proto = shift;
     my $class = ref($proto) || $proto;
 
-    on_warn($on_warn);
-    on_die($on_die);
+    # We would infinite loop if we handled warnings before singleton exists
+    $main::SIG{__WARN__} = \&CORE::warn;
+    $main::SIG{__DIE__} = \&CORE::die;
 
     my $self = {
         ctime    => time,
@@ -31,7 +32,15 @@ sub _new_instance {
     };
     bless($self, $class);
 
-    warn 'debug: NCGI Initialised' if($main::DEBUG);
+    if ($main::DEBUG) {
+        warn "debug: NCGI v$VERSION Init.\n";
+    }
+
+    # now we are allowed to handle warnings
+    if ($ENV{SERVER_SOFTWARE}) {
+        on_warn($on_warn);
+        on_die($on_die);
+    }
     return $self;
 }
 
@@ -52,43 +61,56 @@ sub r {
 }
 
 
+sub frespond {
+    return NCGI->respond('fast_string');
+}
+
+
 sub respond {
     my $self = NCGI->instance;
+    shift;
+    my $action = shift || 'as_string';
 
     if ($self->{sent}) {
         croak 'Attempt to respond() more than once';
         return;
     }
 
-    $self->render_warnings();
-
-    my $res = sprintf('%.3f', time - $self->{ctime});
-    $self->{response}->content->_goto('html');
-    $self->{response}->content->_comment(
-        "NCGI v$NCGI::VERSION. Response Generated in $res seconds"
-    );
-
-
     # Why the perl -CSD flag doesn't work I don't know...
     binmode STDOUT, ":utf8"
         if ($self->{response}->content->_encoding eq 'UTF-8');
 
-    print $self->{response}->as_string;
-    $self->{sent} = 1;
+    if ($action eq 'as_string') {
+        my $res = sprintf('%.3f', time - $self->{ctime});
+        $self->{response}->content->{current} = undef;#_goto('html');
+        $self->{response}->content->_comment(
+            "NCGI v$NCGI::VERSION (response time: ${res}s)"
+        );
+        warn 'debug: NCGI sending reponse' if($main::DEBUG);
+    }
 
     #
     # From here on it doesn't make sense for us to handle
     # warn and die
     #
+
+    $self->_render_warnings();
     $main::SIG{__WARN__} = \&CORE::warn;
     $main::SIG{__DIE__} = \&CORE::die;
+
+    print $self->{response}->$action;
+    $self->{sent} = 1;
 }
 
 
-sub render_warnings {
+#
+# Add all collected warnings to the content document, assuming it is
+# derived from XML::API::XHTML
+#
+sub _render_warnings {
     my $self = shift;
 
-    if (! scalar @{$self->{warnings}}) {
+    if (!@{$self->{warnings}}) {
         return;
     }
 
@@ -96,16 +118,20 @@ sub render_warnings {
 
     if (ref($x) and $x->isa('XML::API::XHTML')) {
         $x->_goto('body');
-        $x->pre_open(-style => "text-align: left;");
+        $x->pre_open(-style => "text-align: left; clear: both;");
 
         my $prev = $self->{ctime};
 
         foreach my $w (@{$self->{warnings}}) {
             my $msg = $w->[1];
             if ($msg =~ s/^debug:\s*//) {
-                $x->_add(sprintf("%.5f (+%.5f) ",
+                $msg =~ s/(.*)\s+at .*?\/lib\/(.*?) line (\d+).*/$1 \($2:$3\)/;
+                $x->_raw('<span style="color: #008880;">');
+                $x->_add(sprintf("%.5f (+%.5f)",
                                 $w->[0] - $self->{ctime},
-                                $w->[0] - $prev) . $msg);
+                                $w->[0] - $prev));#,
+                $x->_raw('</span>');
+                $x->_add(' ' . $msg ."\n");
                 $prev = $w->[0];
             }
             else {
@@ -123,21 +149,34 @@ sub render_warnings {
 #
 # A handler to deal with 'warn' calls
 #
-sub warn_handler {
+sub _warn_handler {
     my $self = __PACKAGE__->instance();
     my $val  = shift;
     $val     = '*undef*' unless (defined($val));
+    chomp($val);
+
+    #
+    # First of all check if this occured within an "eval" block and
+    # don't actually die if that is the case. FIXME This doesn't apply to
+    # warnings?
+    #
+    unless (defined($val) and $val =~ m/^debug:/i) {
+        my $i = 1;
+        while (my @caller = caller($i)) {
+            if ($caller[3] =~ /^\(?eval\)?$/) {
+                return;
+            }
+            $i++;
+        }
+    }
 
     if ($self->{sent}) {
         warn $val;
         return;
     }
 
-#    if (!defined($ENV{HTTP_HOST})) {
-#        warn $val;
-#    }
-
-    push(@{$self->{warnings}}, [time, $val]);
+    my ($package,$filename,$line) = caller;
+    push(@{$self->{warnings}}, [time, $val, $package, $line]);
     return;
 }
 
@@ -145,7 +184,13 @@ sub warn_handler {
 #
 # A handler to override 'die' signals
 #
-sub die_handler {
+sub _die_handler {
+    my $self = __PACKAGE__->instance();
+    my $val  = shift;
+    $val     = '*undef*' unless (defined($val));
+    chomp($val);
+
+
     #
     # First of all check if this occured within an "eval" block and
     # don't actually die if that is the case
@@ -158,18 +203,21 @@ sub die_handler {
         $i++;
     }
 
-    #
-    # respond() if the output has not already been sent
-    #
-    warn 'debug: die:'. join('',@_) if($main::DEBUG);
-    my $self = __PACKAGE__->instance();
     if ($self->{sent}) {
         die "'die' was called after browser output sent, with: @_";
     }
 
+#    warn 'debug: die: '. join('',@_) if($main::DEBUG);
+#    my ($package,$filename,$line) = caller(0);
+#    if ($package eq 'Carp') {
+#        ($package,$filename,$line) = caller(1);
+#    }
+#    warn "First $package $line";
+#    push(@{$self->{warnings}}, [time, $val, $package, $line]);
+
     my $x = $self->{response}->content;
     $x->_goto('body');
-    $x->pre(-style => 'color: #ff0000;', 'error: ', @_);
+    $x->pre(-style => 'color: #ff0000;', $val);
     $x->pre('500 Internal Server Error');
 
     $self->{response}->header->status('500 Internal Server Error');
@@ -323,6 +371,12 @@ set on_die to '\&CORE::die'.
 
 Sends the header and the content back to the user agent. Will complain
 if called more than once.
+
+=head2 frespond
+
+Sends the header and a minimum length content back to the user agent
+using the _fast_string method from L<XML::API>. Will complain if called
+more than once.
 
 =head1 SEE ALSO
 

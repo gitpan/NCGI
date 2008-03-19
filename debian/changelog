@@ -1,3 +1,16 @@
+libncgi-perl (0.07-2) stable; urgency=low
+
+  * New upstream. From now on all changes only recorded in git and/or the
+    Changes file.
+
+ -- Mark Lawrence <nomad@null.net>  Wed,  4 Jul 2007 16:08:03 +0200
+
+libncgi-perl (0.07-1) stable; urgency=low
+
+  * New upstream
+
+ -- Mark Lawrence <nomad@null.net>  Mon, 14 May 2007 14:04:39 +0200
+
 libncgi-perl (0.06-1) stable; urgency=low
 
   * Version 0.06.

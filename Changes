@@ -1,3 +1,130 @@
+Commit: aef8a57ccf837226edebf4e886688ca370844a94 
+Author: Mark Lawrence <nomad@null.net> Thu, 20 Mar 2008 00:16:59 +0100 
+
+    NCGI
+        New fast response method frespond()
+        Cleaned up the WARN and DIE handlers a little
+    
+    NCGI::Cookie
+        Privatised some methods and documented others.
+    
+    NCGI::Response::Header, NCGI::Singleton
+        Documentation update.
+    
+    Tests
+        Fixed t/NCGI.t to be clean (but not at all complete).
+    
+    CPAN
+        Uploaded at v0.07
+
+Commit: 444cad36bd6ac966650dccde81613ad4cb2969c0 
+Author: Mark Lawrence <nomad@null.net> Thu, 23 Aug 2007 12:09:43 +0200 
+
+    Remove some old debugging from lib/NCGI.pm
+
+Commit: a8705cbc1edbd3059676605fb268cba878daf0d3 
+Author: Mark Lawrence <nomad@null.net> Thu, 23 Aug 2007 12:09:24 +0200 
+
+    Removed inc/Module/Install/* from git repo.
+
+Commit: 273d27e856f5e4e3c0c6be922453cdc87371f596 
+Author: Mark Lawrence <nomad@null.net> Wed, 04 Jul 2007 16:27:40 +0200 
+
+    Instead of checking specifically for MSIE or Lynx, we now check if
+    HTTP_ACCEPT contains application/xhtml+xml and if not then return
+    text/html.
+
+Commit: 7b8a80487de29eab6c44a111878987ca00a0f593 
+Author: Mark Lawrence <nomad@null.net> Wed, 04 Jul 2007 16:06:52 +0200 
+
+    Cleanup/improvement of the debugging and warnings handling.
+    Send broken Internet Explorer text/html instead of application/xhtml+xml
+
+Commit: dbc9776857803fd55c440a76d24d87aadb16ea7c 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 14:05:36 +0200 
+
+    VERSION to 0.07
+
+Commit: 29b24c9362efc7a70856aeceaa5f593bc4d95e01 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:56:35 +0200 
+
+    README cleanup. NCGI::Cookie version to 0.06.
+    Finally have everything in git and can start using it properly.
+
+Commit: c09f157fab2d49097514612a6f6cfe044a71dc20 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:54:31 +0200 
+
+    NCGI::Response::Header cleanup and documentation
+
+Commit: a504ad3bbb5c9c1b04de7a75cfbb246d87fdb8a1 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:51:56 +0200 
+
+    Remove debug.pm and associated statements.
+
+Commit: f6208f876832176db9d44cbc860a63935e16148f 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:38:52 +0200 
+
+    Update to the test script. *Much* more could be done in this area...
+
+Commit: 6c53d0d606f65d03fc6bffe560280431ad15899e 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:34:32 +0200 
+
+    Makefile.PL added requires Time::HiRes
+
+Commit: a77ea5b8d8a5ca910418d1f650d596d2f4a7ed17 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:32:02 +0200 
+
+    Moved bin/t.cgi to example/ncgi.cgi
+
+Commit: f8ef990a640e186305f4e381d8b9b627e9cc0793 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:20:55 +0200 
+
+    NCGI::Singleton - VERSION to 0.06, removed all debug::log statements.
+
+Commit: 7ce0a84f111cae363696b1a971fa1f898cd8dd85 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:19:33 +0200 
+
+    Debian Changes:
+      * Version 0.06.
+      * No more dependency on Log::Delta or debug
+      * Added libtime-hires-perl to dependencies.
+
+Commit: f57e8c8ffbb0ec23b9299057b0a10f5227cf8405 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:18:55 +0200 
+
+    NCGI::Query - added languages and locales methods.
+                - convert request parameters into utf8
+
+Commit: 6760204150b1139a3d784e991176c9482b1db3f7 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:18:29 +0200 
+
+    NCGI: Major refactoring, cleanup and documentation
+
+Commit: ef51012ef798385070823930f88fb38e2dc52509 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 13:18:11 +0200 
+
+    NCGI::Response cleanup and documentation.
+
+Commit: 0ed5e3115c788a9f2572db38dbc5e989ac5f00cf 
+Author: Mark Lawrence <nomad@null.net> Mon, 14 May 2007 00:36:09 +0200 
+
+    Added NCGI::Response to git
+
+Commit: 6f20e760c7d64ca49db9677ad1fe0ea82255047d 
+Author: Mark Lawrence <nomad@null.net> Sat, 12 May 2007 18:16:10 +0200 
+
+    updated Debian dependencies
+
+Commit: 0fd37e55803729f540c210b0fd4f698a8b1eac19 
+Author: Mark Lawrence <nomad@null.net> Sat, 12 May 2007 17:38:53 +0200 
+
+    Added pod tests for improved Kwalitee
+
+Commit: 3b4773658b04808e22fb7f8e6bd6dd43eaaf2a2c 
+Author: Mark Lawrence <nomad@null.net> Sat, 12 May 2007 17:37:09 +0200 
+
+    Added Module::Install infrastructure
+
 Commit: aaffc8d116fca77bf9e4a22d7bdf88b986d8da2f 
 Author: Mark Lawrence <nomad@null.net> Sat, 12 May 2007 17:28:56 +0200 
 
