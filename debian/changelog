@@ -1,3 +1,9 @@
+libncgi-perl (0.08-1) stable; urgency=low
+
+  * New upstream.
+
+ -- Mark Lawrence <nomad@null.net>  Tue, 25 Mar 2008 12:15:58 +0100
+
 libncgi-perl (0.07-2) stable; urgency=low
 
   * New upstream. From now on all changes only recorded in git and/or the

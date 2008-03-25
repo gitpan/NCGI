@@ -11,7 +11,8 @@ no_index:
     - inc
     - t
 requires: 
+  Encode: 0
   Time::HiRes: 0
-  XML::API: 0.14
+  XML::API: 0.19
   perl: 5.6.0
-version: 0.07
+version: 0.08

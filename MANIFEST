@@ -27,6 +27,7 @@ MANIFEST
 MANIFEST.SKIP
 META.yml			Module meta-data (added by MakeMaker)
 README
+t/01-NCGI-Cookie.t
 t/NCGI.t
 t/pod.t
 t/pod-coverage.t

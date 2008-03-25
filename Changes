@@ -1,3 +1,17 @@
+Commit: f4be623cb3d5b34fdf39156656c73635c2e4bd02 
+Author: Mark Lawrence <nomad@null.net> Tue, 25 Mar 2008 12:21:25 +0100 
+
+    NCGI::Cookie
+        Added Max-Age parameter. Fixes:
+            http://rt.cpan.org/Ticket/Display.html?id=34337
+        Module now tested.
+    
+    Makefile.PL, debian/control
+        Require XML::API 0.19.
+    
+    CPAN
+        Uploaded as v0.08.
+
 Commit: aef8a57ccf837226edebf4e886688ca370844a94 
 Author: Mark Lawrence <nomad@null.net> Thu, 20 Mar 2008 00:16:59 +0100 
 
