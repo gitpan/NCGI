@@ -4,9 +4,9 @@ use strict;
 use warnings;
 use Carp;
 use NCGI::Response::Header;
-use XML::API::XHTML;
+use XML::API;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub new {
     my $proto = shift;
@@ -29,6 +29,9 @@ sub header {
 
 sub content {
     my $self = shift;
+    if ($self->{content}) {
+        return $self->{content};
+    }
     return $self->xhtml;
 }
 
@@ -39,7 +42,7 @@ sub xhtml {
         return $self->{xhtml};
     }
 
-    $self->{xhtml} = XML::API::XHTML->new;
+    $self->{xhtml} = XML::API->new(doctype => 'xhtml');
     $self->{xhtml}->html_open;
     $self->{xhtml}->_set_id('html');
 
@@ -56,9 +59,17 @@ sub xhtml {
 
 
 sub rss {
-    croak 'rss not implemented yet';
-#    $self->{content} = $self->{rss};
+    my $self = shift;
+
+    if ($self->{rss}) {
+        return $self->{rss};
+    }
+
+    $self->{rss} = XML::API->new(doctype => 'rss');
+    $self->{content} = $self->{rss};
+    return $self->{rss};
 }
+
 
 sub text {
     croak 'text not implemented yet';
@@ -87,8 +98,11 @@ sub as_string {
     }
 
     my $type = $x->_content_type;
-    if ($ENV{HTTP_ACCEPT} and $ENV{HTTP_ACCEPT} !~ m/application\/xhtml\+xml/) {
-        $type = 'text/html';
+    if (ref($x) eq 'XML::API::XHTML') {
+        if ($ENV{HTTP_ACCEPT} and
+            $ENV{HTTP_ACCEPT} !~ m/application\/xhtml\+xml/) {
+            $type = 'text/html';
+        }
     }
     $self->{header}->content_type($type .  '; charset='. $x->_encoding);
 

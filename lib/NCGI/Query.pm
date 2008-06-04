@@ -9,7 +9,7 @@ use NCGI::Cookie;
 use CGI::Util qw(unescape);
 
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 # Class::Singleton::instance() call
 sub _new_instance {

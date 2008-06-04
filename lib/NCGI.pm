@@ -8,9 +8,11 @@ use Time::HiRes qw(time);
 use NCGI::Query;
 use NCGI::Response;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 our $on_warn = \&_warn_handler;
 our $on_die  = \&_die_handler;
+
+my $init;
 
 
 # NCGI::Singleton instantiator
@@ -32,15 +34,14 @@ sub _new_instance {
     };
     bless($self, $class);
 
-    if ($main::DEBUG) {
-        warn "debug: NCGI v$VERSION Init.\n";
-    }
-
     # now we are allowed to handle warnings
-    if ($ENV{SERVER_SOFTWARE}) {
+    if ($ENV{HTTP_HOST}) {
         on_warn($on_warn);
         on_die($on_die);
     }
+
+    $init = [$self->{ctime}, "debug: NCGI v$VERSION Init. at "
+            . '/lib/NCGI.pm line '.__LINE__];
     return $self;
 }
 
@@ -110,6 +111,8 @@ sub respond {
 sub _render_warnings {
     my $self = shift;
 
+    my $perc = time - $self->{ctime};
+
     if (!@{$self->{warnings}}) {
         return;
     }
@@ -118,18 +121,20 @@ sub _render_warnings {
 
     if (ref($x) and $x->isa('XML::API::XHTML')) {
         $x->_goto('body');
-        $x->pre_open(-style => "text-align: left; clear: both;");
+        $x->pre_open(-class => 'noprint',
+                     -style => "text-align: left; clear: both;");
 
         my $prev = $self->{ctime};
 
-        foreach my $w (@{$self->{warnings}}) {
+        foreach my $w ($init, @{$self->{warnings}}) {
             my $msg = $w->[1];
             if ($msg =~ s/^debug:\s*//) {
                 $msg =~ s/(.*)\s+at .*?\/lib\/(.*?) line (\d+).*/$1 \($2:$3\)/;
                 $x->_raw('<span style="color: #008880;">');
-                $x->_add(sprintf("%.5f (+%.5f)",
+                $x->_add(sprintf("%.5f (+%0.5f %05.2f%%)",
                                 $w->[0] - $self->{ctime},
-                                $w->[0] - $prev));#,
+                                $w->[0] - $prev,
+                                100 * ($w->[0] - $prev) / $perc));
                 $x->_raw('</span>');
                 $x->_add(' ' . $msg ."\n");
                 $prev = $w->[0];
@@ -222,7 +227,7 @@ sub _die_handler {
 
     $self->{response}->header->status('500 Internal Server Error');
     $self->respond();
-    die @_;
+    exit;
 }
 
 

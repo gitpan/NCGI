@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 our $AUTOLOAD;
 
 sub new {
@@ -79,6 +79,11 @@ sub _send {
 }
 
 
+sub _print {
+    croak '_print is obsolete - use _send instead';
+}
+
+
 1;
 __END__
 
@@ -96,7 +101,7 @@ NCGI::Response::Header - HTTP Header object for NCGI
   $header->test_header('tested');
   $header->_add_multi('1');
   $header->_add_multi('2');
-  $header->_print();
+  $header->_send();
 
   print "The header sent was:\n\n",$header->_as_string();
 

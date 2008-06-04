@@ -40,3 +40,5 @@ if (0 and $capture) {
     like($@, qr/Attempt/, 'responding twice');
 }
 
+NCGI->response->rss->channel('this is my channel');
+NCGI->respond;

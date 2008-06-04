@@ -6,7 +6,7 @@ use Digest::MD5 qw(md5_hex);
 use CGI::Util qw(escape unescape);
 use overload '""' => \&_as_string, 'fallback' => 1;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 # ----------------------------------------------------------------------
 # Class Functions
@@ -16,7 +16,8 @@ our $VERSION = '0.08';
 # Return a HASHREF of Cookies recieved
 #
 sub fetch {
-    my @pairs = split(/\;\s*/, $ENV{HTTP_COOKIE} ? $ENV{HTTP_COOKIE} : '');
+    my $src = shift || $ENV{HTTP_COOKIE} || '';
+    my @pairs = split(/\;\s*/, $src);
     my $hashref = {};
     foreach my $sets (@pairs) {
         my ($key,$val) = split(/=/, $sets);
@@ -25,8 +26,8 @@ sub fetch {
                 push(@{$hashref->{unescape($key)}}, unescape($val));
             }
             else {
-                push(@{$hashref->{unescape($key)}},
-                       $hashref->{unescape($key)}, unescape($val));
+                $hashref->{unescape($key)} =
+                    [$hashref->{unescape($key)}, unescape($val)];
             }
         }
         else {
