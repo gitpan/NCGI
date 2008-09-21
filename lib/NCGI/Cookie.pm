@@ -6,7 +6,7 @@ use Digest::MD5 qw(md5_hex);
 use CGI::Util qw(escape unescape);
 use overload '""' => \&_as_string, 'fallback' => 1;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 # ----------------------------------------------------------------------
 # Class Functions
@@ -42,7 +42,7 @@ sub fetch {
 # ----------------------------------------------------------------------
 
 #
-# This routine takes (name,value,minutes_to_live,path,domain) as arguments
+# This routine takes (name,value,epoch,path,domain) as arguments
 # to set a cookie.
 #
 sub new {
@@ -51,7 +51,7 @@ sub new {
     my $self  = {
         name    => undef,
         value   => undef,
-        expires => 0,
+        expires => time + 60*60*24,
         max_age => undef,
         path    => '/',
         domain  => undef,
@@ -63,7 +63,6 @@ sub new {
     $self->{value} = $self->{value} ? escape(_cookie_scrub($self->{value})) :
                      md5_hex(md5_hex(time . {} . rand() . $$));
 
-    $self->{expires} = 60 * $self->{expires};
     return $self;
 }
 
@@ -81,7 +80,7 @@ sub value {
 
 sub expires {
     my $self = shift;
-    $self->{expires} = 60 * shift if (@_);
+    $self->{expires} = shift if (@_);
     return $self->{expires};
 }
 
@@ -104,13 +103,9 @@ sub domain {
 }
 
 
-#
-# This routine removes cookie of (name) by setting the expiration
-# to a date/time GMT of (now - 24hours)
-#
 sub expire_cookie() {
     my $self = shift;
-    $self->{expires} = -1440;
+    $self->{expires} = 1;
 }
 
 sub _as_string {
@@ -126,8 +121,8 @@ sub _as_string {
     $str   .= ' Max-Age=' . $self->{max_age} . ';'
         if (defined($self->{max_age}));
     $str   .= ' Expires=' . _cookie_date($self->{expires}) . ';' 
-        if ($self->{expires});
-    $str   .= ' Version=1;';
+        if (defined($self->{expires}));
+    $str   .= ' Version=1';
     return $str;
 }
 
@@ -152,13 +147,13 @@ sub _cookie_scrub {
 # time is ALWAYS GMT!
 #
 sub _cookie_date() {
-  my $seconds = shift;
+  my $when = shift;
 
   my %mn = ('Jan','01', 'Feb','02', 'Mar','03', 'Apr','04',
             'May','05', 'Jun','06', 'Jul','07', 'Aug','08',
             'Sep','09', 'Oct','10', 'Nov','11', 'Dec','12' );
 
-  my $sydate = gmtime(time + $seconds);
+  my $sydate = gmtime($when);
   my ($day, $month, $num, $time, $year) = split(/\s+/,$sydate);
 
   if (length($num) == 1) { 
@@ -187,17 +182,18 @@ NCGI::Cookie - HTTP Cookie object for NCGI
   my $cookie_value = $hashref->{cookie_name};
 
   # object methods for creating cookies to send in the response
-  my ($name, $value, $min, $path, $domain) = ('c1','value',60,'/',undef);
+  my ($name, $value, $epoch, $path, $domain) =
+    ('c1','value',1221397599,'/',undef);
   my $c = NCGI::Cookie->new(
     name    => $name,
     value   => $value,
-    expires => $min,
+    expires => $epoch,
     path    => $path,
     domain  => $domain,
   );
 
   # You can also "print $c->_as_string;"
-  print $c; # c1=value; expires=Tue 07-Jun-2005 12:02:01 GMT; path=/;
+  print $c; # c1=value; expires=Tue 07-Jun-2005 12:02:01 GMT; path=/
 
 
 =head1 DESCRIPTION
@@ -229,7 +225,7 @@ Set or Get the value of the cookie. Will be scrubbed for illegal characters.
 
 =head2 expires
 
-Set or Get the expiration value of the cookie in minutes
+Set or Get the expiration value of the cookie as a unix epoch.
 
 =head2 max_age
 

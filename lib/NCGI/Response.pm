@@ -6,7 +6,7 @@ use Carp;
 use NCGI::Response::Header;
 use XML::API;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub new {
     my $proto = shift;

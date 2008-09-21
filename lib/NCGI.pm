@@ -8,7 +8,7 @@ use Time::HiRes qw(time);
 use NCGI::Query;
 use NCGI::Response;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $on_warn = \&_warn_handler;
 our $on_die  = \&_die_handler;
 
@@ -227,7 +227,6 @@ sub _die_handler {
 
     $self->{response}->header->status('500 Internal Server Error');
     $self->respond();
-    exit;
 }
 
 

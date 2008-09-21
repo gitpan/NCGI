@@ -27,25 +27,26 @@ can_ok('NCGI::Cookie', qw/
 my $c = NCGI::Cookie->new(
     name => 'test',
     value => 'testvalue',
+    expires => 1221927411,
 );
 
-is($c,'test=testvalue; Path=/; Version=1;', $c);
+is($c,'test=testvalue; Path=/; Expires=Sat 20-Sep-2008 16:16:51 GMT; Version=1', $c);
 
 $c->value('newvalue');
-is($c,'test=newvalue; Path=/; Version=1;', $c);
+is($c,'test=newvalue; Path=/; Expires=Sat 20-Sep-2008 16:16:51 GMT; Version=1', $c);
 
 $c->domain('mydomain');
-is($c,'test=newvalue; Path=/; Domain=mydomain; Version=1;', $c);
+is($c,'test=newvalue; Path=/; Domain=mydomain; Expires=Sat 20-Sep-2008 16:16:51 GMT; Version=1', $c);
 
 my $nc = NCGI::Cookie::fetch($c);
 isa_ok($nc, 'HASH');
 is($nc->{test},'newvalue', 'value check');
 
 $c->domain(undef);
-is($c,'test=newvalue; Path=/; Version=1;', $c);
+is($c,'test=newvalue; Path=/; Expires=Sat 20-Sep-2008 16:16:51 GMT; Version=1', $c);
 
 $c->max_age(60);
-is($c,'test=newvalue; Path=/; Max-Age=60; Version=1;', $c);
+is($c,'test=newvalue; Path=/; Max-Age=60; Expires=Sat 20-Sep-2008 16:16:51 GMT; Version=1', $c);
 
 $c->name(undef);
 

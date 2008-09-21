@@ -1,3 +1,15 @@
+libncgi-perl (0.10-1) stable; urgency=low
+
+  * new upstream.
+
+ -- Mark Lawrence <nomad@null.net>  Sun, 21 Sep 2008 15:29:50 +0200
+
+libncgi-perl (0.09-2) stable; urgency=low
+
+  * new upstream.
+
+ -- Mark Lawrence <nomad@null.net>  Sat, 20 Sep 2008 18:15:55 +0200
+
 libncgi-perl (0.09-1) stable; urgency=low
 
   * New Upstream.

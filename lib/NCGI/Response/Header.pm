@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 our $AUTOLOAD;
 
 sub new {
@@ -55,6 +55,16 @@ sub AUTOLOAD {
 sub _as_string {
     my $self = shift;
     my @items;
+
+    if ($ENV{SERVER_SOFTWARE} &&
+        $ENV{SERVER_SOFTWARE} =~ m/^HTTP::Server::Simple/) {
+        if ($self->{headers}->{status}) {
+            push(@items, 'HTTP/1.1 '. $self->{headers}->{status}->[0]);
+        }
+        else {
+            push(@items, 'HTTP/1.1 200 OK');
+        }
+    }
     while (my ($key, $val) = each %{$self->{headers}}) {
         (my $header = $key) =~  s/(^\w)/uc($1)/e;
         $header =~  s/_(\w)/'-' . uc($1)/e;
