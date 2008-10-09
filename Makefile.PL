@@ -7,6 +7,8 @@ all_from        'lib/NCGI.pm';
 requires        'XML::API'      => '0.22';
 requires        'Time::HiRes'   => 0;
 requires        'Encode'        => 0;
+requires        'I18N::LangTags::Detect' => 0;
+requires        'I18N::LangTags'         => 0;
 build_requires  'Test::More'    => '0.42';
 
 auto_install;

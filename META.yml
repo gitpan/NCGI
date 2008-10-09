@@ -5,11 +5,11 @@ author:
 build_requires:
   Test::More: 0.42
 distribution_type: module
-generated_by: 'Module::Install version 0.72'
+generated_by: 'Module::Install version 0.76'
 license: GPL
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.3.html
-  version: 1.3
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
 name: NCGI
 no_index:
   directory:
@@ -17,7 +17,9 @@ no_index:
     - t
 requires:
   Encode: 0
+  I18N::LangTags: 0
+  I18N::LangTags::Detect: 0
   Time::HiRes: 0
   XML::API: 0.22
   perl: 5.6.0
-version: 0.10
+version: 0.11

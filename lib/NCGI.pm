@@ -8,7 +8,7 @@ use Time::HiRes qw(time);
 use NCGI::Query;
 use NCGI::Response;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 our $on_warn = \&_warn_handler;
 our $on_die  = \&_die_handler;
 
@@ -159,21 +159,6 @@ sub _warn_handler {
     my $val  = shift;
     $val     = '*undef*' unless (defined($val));
     chomp($val);
-
-    #
-    # First of all check if this occured within an "eval" block and
-    # don't actually die if that is the case. FIXME This doesn't apply to
-    # warnings?
-    #
-    unless (defined($val) and $val =~ m/^debug:/i) {
-        my $i = 1;
-        while (my @caller = caller($i)) {
-            if ($caller[3] =~ /^\(?eval\)?$/) {
-                return;
-            }
-            $i++;
-        }
-    }
 
     if ($self->{sent}) {
         warn $val;

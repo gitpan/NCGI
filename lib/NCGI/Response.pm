@@ -6,7 +6,7 @@ use Carp;
 use NCGI::Response::Header;
 use XML::API;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub new {
     my $proto = shift;
@@ -46,11 +46,11 @@ sub xhtml {
     $self->{xhtml}->html_open;
     $self->{xhtml}->_set_id('html');
 
-    $self->{xhtml}->head_open(undef);
+    $self->{xhtml}->head_open('');
     $self->{xhtml}->_set_id('head');
     $self->{xhtml}->head_close();
 
-    $self->{xhtml}->body_open(undef);
+    $self->{xhtml}->body_open('');
     $self->{xhtml}->_set_id('body');
 
     $self->{content} = $self->{xhtml};

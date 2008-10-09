@@ -1,7 +1,7 @@
 package NCGI::Singleton;
 use strict;
 use warnings;
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub instance {
     my $class  = shift;

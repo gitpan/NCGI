@@ -1,9 +1,4 @@
 Changes
-debian/changelog
-debian/compat
-debian/control
-debian/copyright
-debian/rules
 example/ncgi.cgi
 inc/Module/Install/Can.pm
 inc/Module/Install/Base.pm
