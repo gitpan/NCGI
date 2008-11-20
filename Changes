@@ -1,4 +1,32 @@
-commit 2466f9040f1393129b98c6ea7a8a8ccc1fa9fdf0 (master)
+commit 3f431c365495024d79b3f31444071c7df47c09f1 (master)
+Author: Mark Lawrence <nomad@null.net>
+Date:   Thu Nov 20 20:30:20 2008 +0100
+
+    CPAN - Uploaded as v0.12.
+
+commit 1bb939a976878d9bb34a22c9ab0d2d26a500e38b (master~1)
+Author: Mark Lawrence <nomad@null.net>
+Date:   Thu Nov 20 20:26:03 2008 +0100
+
+    Updated example/ncgi.cgi to include some UTF8 strings.
+
+commit 95cb24aaf46866964f1565829a230955611c4408 (master~2)
+Author: Mark Lawrence <nomad@null.net>
+Date:   Thu Nov 20 20:16:03 2008 +0100
+
+    Force NCGI::Query->param to return undef when appropriate.
+    
+    If the parameter was not submitted by the browser, the param() method
+    was doing a straight "return". Using that value in something like a
+    hash results in an uneven number of elements. Ie the following:
+    
+        (a => val, b => NCGI->q->param('notexist'))
+    
+    was exactly the same as this:
+    
+        (a => val, b)
+
+commit 2466f9040f1393129b98c6ea7a8a8ccc1fa9fdf0 (master~3)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Oct 9 16:48:23 2008 +0200
 
@@ -7,25 +35,25 @@ Date:   Thu Oct 9 16:48:23 2008 +0200
     CPAN
         Uploaded as v0.11.
 
-commit 1ee9903478b7fe507c8fb16b347b42988b2b2a9d (master~1)
+commit 1ee9903478b7fe507c8fb16b347b42988b2b2a9d (master~4)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Oct 9 16:32:54 2008 +0200
 
     Removed ./debian from git control. dh-make-perl is your friend.
 
-commit 696c8d29582e2fe92ec1cf2dbcd64232691628d1 (master~2)
+commit 696c8d29582e2fe92ec1cf2dbcd64232691628d1 (master~5)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Oct 9 16:21:28 2008 +0200
 
     NCGI::Response - Fixed two calls to XML::API->_add with undefined content.
 
-commit 97921149fa01bf49a20455369801dfa422d9c131 (master~3)
+commit 97921149fa01bf49a20455369801dfa422d9c131 (master~6)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Fri Oct 3 16:41:15 2008 +0200
 
     NCGI Bugfix: stop hiding warnings that occur within eval blocks.
 
-commit fa65764e2f410d18371f33455204936b0bcb24a0 (master~4)
+commit fa65764e2f410d18371f33455204936b0bcb24a0 (master~7)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sun Sep 21 15:33:15 2008 +0200
 
@@ -35,25 +63,25 @@ Date:   Sun Sep 21 15:33:15 2008 +0200
     CPAN
         Uploaded as version 0.10.
 
-commit e40e5ce69f46f8bbe9700ecc2334ddd3b0883902 (master~5)
+commit e40e5ce69f46f8bbe9700ecc2334ddd3b0883902 (master~8)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sat Sep 20 18:20:09 2008 +0200
 
     Fixed up broken tests for NCGI::Cookie
 
-commit 88f493faef86a5031915da21ac2cf231c60ebd62 (master~6)
+commit 88f493faef86a5031915da21ac2cf231c60ebd62 (master~9)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sun Sep 14 15:09:46 2008 +0200
 
     NCGI::Cookie::expire() now takes unix epoch instead of minutes.
 
-commit e6783c5e497f70227ee0afb6744d9d0d7e35b907 (master~7)
+commit e6783c5e497f70227ee0afb6744d9d0d7e35b907 (master~10)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sun Sep 14 15:05:43 2008 +0200
 
     NCGI::Response::Header support for running under HTTP::Server::Simple
 
-commit 46fbbe735db7e44999bfa94dcacdbe5f4c5abdd0 (master~8)
+commit 46fbbe735db7e44999bfa94dcacdbe5f4c5abdd0 (master~11)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Tue Jun 3 12:38:07 2008 +0200
 
@@ -81,7 +109,7 @@ Date:   Tue Jun 3 12:38:07 2008 +0200
     CPAN
         Uploaded as v0.09.
 
-commit f4be623cb3d5b34fdf39156656c73635c2e4bd02 (master~9)
+commit f4be623cb3d5b34fdf39156656c73635c2e4bd02 (master~12)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Tue Mar 25 12:21:25 2008 +0100
 
@@ -96,7 +124,7 @@ Date:   Tue Mar 25 12:21:25 2008 +0100
     CPAN
         Uploaded as v0.08.
 
-commit aef8a57ccf837226edebf4e886688ca370844a94 (master~10)
+commit aef8a57ccf837226edebf4e886688ca370844a94 (master~13)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Mar 20 00:16:59 2008 +0100
 
@@ -116,19 +144,19 @@ Date:   Thu Mar 20 00:16:59 2008 +0100
     CPAN
         Uploaded at v0.07
 
-commit 444cad36bd6ac966650dccde81613ad4cb2969c0 (master~11)
+commit 444cad36bd6ac966650dccde81613ad4cb2969c0 (master~14)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Aug 23 12:09:43 2007 +0200
 
     Remove some old debugging from lib/NCGI.pm
 
-commit a8705cbc1edbd3059676605fb268cba878daf0d3 (master~12)
+commit a8705cbc1edbd3059676605fb268cba878daf0d3 (master~15)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Aug 23 12:09:24 2007 +0200
 
     Removed inc/Module/Install/* from git repo.
 
-commit 273d27e856f5e4e3c0c6be922453cdc87371f596 (master~13)
+commit 273d27e856f5e4e3c0c6be922453cdc87371f596 (master~16)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Wed Jul 4 16:27:40 2007 +0200
 
@@ -136,63 +164,63 @@ Date:   Wed Jul 4 16:27:40 2007 +0200
     HTTP_ACCEPT contains application/xhtml+xml and if not then return
     text/html.
 
-commit 7b8a80487de29eab6c44a111878987ca00a0f593 (master~14)
+commit 7b8a80487de29eab6c44a111878987ca00a0f593 (master~17)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Wed Jul 4 16:06:52 2007 +0200
 
     Cleanup/improvement of the debugging and warnings handling.
     Send broken Internet Explorer text/html instead of application/xhtml+xml
 
-commit dbc9776857803fd55c440a76d24d87aadb16ea7c (master~15)
+commit dbc9776857803fd55c440a76d24d87aadb16ea7c (master~18)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 14:05:36 2007 +0200
 
     VERSION to 0.07
 
-commit 29b24c9362efc7a70856aeceaa5f593bc4d95e01 (master~16)
+commit 29b24c9362efc7a70856aeceaa5f593bc4d95e01 (master~19)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:56:35 2007 +0200
 
     README cleanup. NCGI::Cookie version to 0.06.
     Finally have everything in git and can start using it properly.
 
-commit c09f157fab2d49097514612a6f6cfe044a71dc20 (master~17)
+commit c09f157fab2d49097514612a6f6cfe044a71dc20 (master~20)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:54:31 2007 +0200
 
     NCGI::Response::Header cleanup and documentation
 
-commit a504ad3bbb5c9c1b04de7a75cfbb246d87fdb8a1 (master~18)
+commit a504ad3bbb5c9c1b04de7a75cfbb246d87fdb8a1 (master~21)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:51:56 2007 +0200
 
     Remove debug.pm and associated statements.
 
-commit f6208f876832176db9d44cbc860a63935e16148f (master~19)
+commit f6208f876832176db9d44cbc860a63935e16148f (master~22)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:38:52 2007 +0200
 
     Update to the test script. *Much* more could be done in this area...
 
-commit 6c53d0d606f65d03fc6bffe560280431ad15899e (master~20)
+commit 6c53d0d606f65d03fc6bffe560280431ad15899e (master~23)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:34:32 2007 +0200
 
     Makefile.PL added requires Time::HiRes
 
-commit a77ea5b8d8a5ca910418d1f650d596d2f4a7ed17 (master~21)
+commit a77ea5b8d8a5ca910418d1f650d596d2f4a7ed17 (master~24)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:32:02 2007 +0200
 
     Moved bin/t.cgi to example/ncgi.cgi
 
-commit f8ef990a640e186305f4e381d8b9b627e9cc0793 (master~22)
+commit f8ef990a640e186305f4e381d8b9b627e9cc0793 (master~25)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:20:55 2007 +0200
 
     NCGI::Singleton - VERSION to 0.06, removed all debug::log statements.
 
-commit 7ce0a84f111cae363696b1a971fa1f898cd8dd85 (master~23)
+commit 7ce0a84f111cae363696b1a971fa1f898cd8dd85 (master~26)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:19:33 2007 +0200
 
@@ -201,68 +229,68 @@ Date:   Mon May 14 13:19:33 2007 +0200
       * No more dependency on Log::Delta or debug
       * Added libtime-hires-perl to dependencies.
 
-commit f57e8c8ffbb0ec23b9299057b0a10f5227cf8405 (master~24)
+commit f57e8c8ffbb0ec23b9299057b0a10f5227cf8405 (master~27)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:18:55 2007 +0200
 
     NCGI::Query - added languages and locales methods.
                 - convert request parameters into utf8
 
-commit 6760204150b1139a3d784e991176c9482b1db3f7 (master~25)
+commit 6760204150b1139a3d784e991176c9482b1db3f7 (master~28)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:18:29 2007 +0200
 
     NCGI: Major refactoring, cleanup and documentation
 
-commit ef51012ef798385070823930f88fb38e2dc52509 (master~26)
+commit ef51012ef798385070823930f88fb38e2dc52509 (master~29)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 13:18:11 2007 +0200
 
     NCGI::Response cleanup and documentation.
 
-commit 0ed5e3115c788a9f2572db38dbc5e989ac5f00cf (master~27)
+commit 0ed5e3115c788a9f2572db38dbc5e989ac5f00cf (master~30)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon May 14 00:36:09 2007 +0200
 
     Added NCGI::Response to git
 
-commit 6f20e760c7d64ca49db9677ad1fe0ea82255047d (master~28)
+commit 6f20e760c7d64ca49db9677ad1fe0ea82255047d (master~31)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sat May 12 18:16:10 2007 +0200
 
     updated Debian dependencies
 
-commit 0fd37e55803729f540c210b0fd4f698a8b1eac19 (master~29)
+commit 0fd37e55803729f540c210b0fd4f698a8b1eac19 (master~32)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sat May 12 17:38:53 2007 +0200
 
     Added pod tests for improved Kwalitee
 
-commit 3b4773658b04808e22fb7f8e6bd6dd43eaaf2a2c (master~30)
+commit 3b4773658b04808e22fb7f8e6bd6dd43eaaf2a2c (master~33)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sat May 12 17:37:09 2007 +0200
 
     Added Module::Install infrastructure
 
-commit aaffc8d116fca77bf9e4a22d7bdf88b986d8da2f (master~31)
+commit aaffc8d116fca77bf9e4a22d7bdf88b986d8da2f (master~34)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Sat May 12 17:28:56 2007 +0200
 
     Fully converted Makefile.PL to use Module::Install
 
-commit f3bc3ecb664c3ba36e741508dc48987903f9f7b4 (master~32)
+commit f3bc3ecb664c3ba36e741508dc48987903f9f7b4 (master~35)
 Author: tailor <nomad@null.net>
 Date:   Mon Apr 24 10:08:21 2006 +0000
 
     [project @ Refactored out NCGI/Response.pm from NCGI.pm]
 
-commit 46b8773bf215005ecd1c89ce32d6edf7fefb9016 (master~33)
+commit 46b8773bf215005ecd1c89ce32d6edf7fefb9016 (master~36)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Tue Aug 30 15:56:31 2005 +0000
 
     [project @ debian: liblog-delta-perl dependency >= 0.03]
 
-commit 369824c547707c661ff2a6592ab2e141286c91a1 (master~34)
+commit 369824c547707c661ff2a6592ab2e141286c91a1 (master~37)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Tue Aug 30 15:50:41 2005 +0000
 
@@ -270,7 +298,7 @@ Date:   Tue Aug 30 15:50:41 2005 +0000
     * Documentation updates.
     * Added dependency on Log::Delta and removed dependency on debug.
 
-commit 597449897d6061eb5d86f13fcbb880cfc051b2dd (master~35)
+commit 597449897d6061eb5d86f13fcbb880cfc051b2dd (master~38)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Jul 21 09:39:45 2005 +0000
 
@@ -279,49 +307,49 @@ Date:   Thu Jul 21 09:39:45 2005 +0000
     * Documentation improvement: When to use NCGI? Advantages?
     * Documentation: send me an email if you are using this module
 
-commit 8b123f0488af6f2c098fea7b32c28d2be307a002 (master~36)
+commit 8b123f0488af6f2c098fea7b32c28d2be307a002 (master~39)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Jul 7 10:59:00 2005 +0000
 
     [project @ Version to 0.04]
 
-commit 0b1738eb2d7ed6e77f008d5a5b4b8234cf1b580f (master~37)
+commit 0b1738eb2d7ed6e77f008d5a5b4b8234cf1b580f (master~40)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Jul 7 10:54:07 2005 +0000
 
     [project @ Added basic test]
 
-commit 7397a962b01afd12b2fb37fe7ff1fbf1a76f87fc (master~38)
+commit 7397a962b01afd12b2fb37fe7ff1fbf1a76f87fc (master~41)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Jul 7 10:25:33 2005 +0000
 
     [project @ Moved NCGI::Cookie::fetch around]
 
-commit f976d8ab9df6358c234fffeed01071d85b8cb81f (master~39)
+commit f976d8ab9df6358c234fffeed01071d85b8cb81f (master~42)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Thu Jul 7 10:21:35 2005 +0000
 
     [project @ Documented all NCGI* Classes]
 
-commit b430494ba9fe80bdd05922af7ec0576c251e4de1 (master~40)
+commit b430494ba9fe80bdd05922af7ec0576c251e4de1 (master~43)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Wed Jul 6 17:20:58 2005 +0000
 
     [project @ Removed Time::HiRes dependency]
 
-commit 80f2c3ebf78a80c89c842f7c77a0bb0e1eb546a2 (master~41)
+commit 80f2c3ebf78a80c89c842f7c77a0bb0e1eb546a2 (master~44)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Wed Jul 6 11:38:54 2005 +0000
 
     [project @ Added dependency on 'debug' module from CPAN (removed local version)]
 
-commit 73695ffb7bb26b6c1ea4fb43f0748e53ef139e93 (master~42)
+commit 73695ffb7bb26b6c1ea4fb43f0748e53ef139e93 (master~45)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Wed Jul 6 11:23:11 2005 +0000
 
     [project @ Removed Log::Delta (now in separate package)]
 
-commit eb33433a9a05696b459d719ce14ce7dbd1fb35e0 (master~43)
+commit eb33433a9a05696b459d719ce14ce7dbd1fb35e0 (master~46)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 09:59:27 2005 +0000
 
@@ -329,31 +357,31 @@ Date:   Mon Jun 20 09:59:27 2005 +0000
     * Removed Class::Singleton dependency
     * Added Time::HiRes dependency
 
-commit 4ecdee4e41aae65242c9b39a65f246df8fbd98dd (master~44)
+commit 4ecdee4e41aae65242c9b39a65f246df8fbd98dd (master~47)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 09:37:50 2005 +0000
 
     [project @ debian/changelog: updated Description field]
 
-commit 6084e0ea479164ae4a8f041a580396dc64112213 (master~45)
+commit 6084e0ea479164ae4a8f041a580396dc64112213 (master~48)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 09:33:51 2005 +0000
 
     [project @ Documented dependency on Time::HiRes]
 
-commit 1c870cd3c4ebf6f30b9f3cf7db5807f9f611d4fe (master~46)
+commit 1c870cd3c4ebf6f30b9f3cf7db5807f9f611d4fe (master~49)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 09:23:21 2005 +0000
 
     [project @ Added Log::Delta]
 
-commit e7bd91f40a196d1d5068d12a7108d9835ee500f2 (master~47)
+commit e7bd91f40a196d1d5068d12a7108d9835ee500f2 (master~50)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 08:57:29 2005 +0000
 
     [project @ Removed send() (must now use $cgi->respond)]
 
-commit ddc855708b47c71be7ee3b80f9586a949497ae69 (master~48)
+commit ddc855708b47c71be7ee3b80f9586a949497ae69 (master~51)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 08:41:14 2005 +0000
 
@@ -361,25 +389,25 @@ Date:   Mon Jun 20 08:41:14 2005 +0000
     * Upped version to 0.02
     * General implementation cleanup, API starting to finalise.
 
-commit 930af81e78bf4b945270fd6f972a75c102c0636e (master~49)
+commit 930af81e78bf4b945270fd6f972a75c102c0636e (master~52)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 08:37:59 2005 +0000
 
     [project @ escape/unescape query keys and values in NCGI::Cookie]
 
-commit 23d1b0ccac49a79090f5ad02d4d9d2a142a56125 (master~50)
+commit 23d1b0ccac49a79090f5ad02d4d9d2a142a56125 (master~53)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 08:36:06 2005 +0000
 
     [project @ Added NCGI::Singleton - Class::Singleton implementation for persistent Perl]
 
-commit c19f526508497db920a47f2a71ceadbcfbf80de5 (master~51)
+commit c19f526508497db920a47f2a71ceadbcfbf80de5 (master~54)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 20 08:35:20 2005 +0000
 
     [project @ Added debug.pm from Infinity Interactive]
 
-commit 7d72d532f83fee40ba4dab01820896ddf12fe0c5 (master~52)
+commit 7d72d532f83fee40ba4dab01820896ddf12fe0c5 (master~55)
 Author: Mark Lawrence <nomad@null.net>
 Date:   Mon Jun 6 15:07:01 2005 +0000
 

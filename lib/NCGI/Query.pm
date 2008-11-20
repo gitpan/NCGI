@@ -9,7 +9,7 @@ use NCGI::Cookie;
 use CGI::Util qw(unescape);
 
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 # Class::Singleton::instance() call
 sub _new_instance {
@@ -112,7 +112,7 @@ sub ispost {
 sub param {
     my $self = shift;
     my $param = shift;
-    return unless exists($self->{q_params}->{$param});
+    return undef unless exists($self->{q_params}->{$param});
     my $val = $self->{q_params}->{$param};
     wantarray && (ref($val) eq 'ARRAY') && return @{$val};
     (ref($val) eq 'ARRAY') && return $val->[0];

@@ -6,7 +6,7 @@ use Digest::MD5 qw(md5_hex);
 use CGI::Util qw(escape unescape);
 use overload '""' => \&_as_string, 'fallback' => 1;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 # ----------------------------------------------------------------------
 # Class Functions
